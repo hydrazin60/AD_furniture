@@ -1,10 +1,16 @@
+import mongoose from "mongoose";
 const PurchaseInvoiceSchema = new mongoose.Schema(
   {
     supplierId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Supplier",
-      required: true,
     },
+    purchaseInvoiceCreatedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Worker",
+      },
+    ],
     BranchId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Branch",

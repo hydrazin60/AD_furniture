@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import staffAuthRouter from "./routes/Auth/staffAuth.routes.js";
 import BranchRouter from "./routes/Branch/Branch.routes.js";
+import invoiceRouter from "./routes/invoices/invoices.routes.js";
 
 dotenv.config();
 const app = express();
@@ -25,6 +26,7 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/v1/ad_furniture/staff/auth", staffAuthRouter);
 app.use("/api/v1/ad_furniture/branch", BranchRouter);
+app.use("/api/v1/ad_furniture/invoices", invoiceRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);

@@ -7,6 +7,12 @@ const ExpenseInvoiceSchema = new mongoose.Schema(
       ref: "Branch",
       required: true,
     },
+    expenseInvoiceCreatedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Worker",
+      },
+    ],
     Price: {
       type: Number,
       required: [true, "Price is required"],
@@ -35,8 +41,7 @@ const ExpenseInvoiceSchema = new mongoose.Schema(
     },
     RefNumber: {
       type: String,
-      minlength: [21, "Ref number must be 21 characters"],
-      maxlength: [21, "Ref number must be 21 characters"],
+      required: [true, "Ref number is required"],
     },
     messageOnStatement: {
       type: String,

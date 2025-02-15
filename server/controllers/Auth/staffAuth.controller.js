@@ -1,8 +1,9 @@
 import Worker from "../../models/user/worker/worker.models.js";
 import bcrypt from "bcrypt";
 import cloudinary from "../../utils/cloudnary.js";
-import Branch from "../../models/Branch/Branch.model.js";
 import jwt from "jsonwebtoken";
+import Branch from "../../models/Branch/Branch.model.js";
+
 export const StaffRegister = async (req, res) => {
   try {
     const {
@@ -14,14 +15,16 @@ export const StaffRegister = async (req, res) => {
       role,
       branchName,
     } = req.body;
-    const Branch = await Branch.findOne({ branchName });
-    if (!Branch) {
+
+    const branch = await Branch.findOne({ branchName });
+    if (!branch) {
       return res.status(400).json({
         success: false,
         error: true,
         message: "Branch not found",
       });
     }
+
     if (!fullName) {
       return res.status(400).json({
         success: false,
@@ -90,21 +93,32 @@ export const StaffRegister = async (req, res) => {
       address,
       profilePic: profilePicURI,
       role,
-      BranchId: Branch._id,
+      BranchId: branch._id,
     });
 
-    const { password: _, ...StaffData } = staff.toObject();
+    const { password: _, ...staffData } = staff.toObject();
 
     const populatedStaff = await Worker.findById(staff._id).populate(
       "BranchId",
       "branchName address branchImage"
     );
 
+    if (
+      populatedStaff.role === "Manager" ||
+      populatedStaff.role === "MonthlySalaryWorkers" ||
+      populatedStaff.role === "DailyWageWorkers" ||
+      populatedStaff.role === "ProjectBasedWorkers" ||
+      populatedStaff.role === "DeliveryBoy"
+    ) {
+      branch.BranchStaff.push(staff._id);
+      await branch.save();
+    }
+
     res.status(201).json({
       success: true,
       error: false,
       message: `${fullName} registered successfully`,
-      data: StaffData,
+      data: populatedStaff,
     });
   } catch (err) {
     console.error(`Error in StaffRegister:`, err);
@@ -115,10 +129,8 @@ export const StaffRegister = async (req, res) => {
     });
   }
 };
-
 export const StaffLogin = async (req, res) => {
   try {
-    console.log("Login Request Body:", req.body);
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -155,14 +167,14 @@ export const StaffLogin = async (req, res) => {
       "_id branchName address branchImage numberOfWorkers rawMaterials vehicles"
     );
 
-    // if (!populatedStaff.BranchId) {
-    //   return res.status(400).json({
-    //     success: false,
-    //     error: true,
-    //     message: "Branch information not found for this staff",
-    //   });
-    // }
-    // staffData.BranchId = populatedStaff.BranchId;
+    if (!populatedStaff.BranchId) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "Branch information not found for this staff",
+      });
+    }
+    staffData.BranchId = populatedStaff.BranchId;
 
     const token = jwt.sign({ staffId: staff._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",

@@ -7,11 +7,10 @@
 // export const createNewBranch = async (req, res) => {
 //   try {
 //     const { branchName, branchPassword, address } = req.body;
-//     console.log(req.body);
-//     console.log(req.files);
 
-//     // ✅ Check if branch already exists
+//     const branchImages = req.files;
 //     const existingBranch = await Branch.findOne({ branchName });
+
 //     if (existingBranch) {
 //       return res.status(400).json({
 //         success: false,
@@ -20,13 +19,32 @@
 //       });
 //     }
 
-//     // ✅ Get authenticated staff details from DB
-//     const BranchImages = req.files?.branchImage || [];
-//     const BranchImageURI = [];
+//     const staffId = req.staffId;
+//     const staffData = await Worker.findById(staffId);
 
-//     if (Array.isArray(BranchImages) && BranchImages.length > 0) {
+//     if (!staffData || staffData.role !== "Admin") {
+//       return res.status(400).json({
+//         success: false,
+//         error: true,
+//         message: "Only admin can create a new branch",
+//       });
+//     }
+
+//     if (!branchName || !branchPassword) {
+//       return res.status(400).json({
+//         success: false,
+//         error: true,
+//         message: "Branch name and password are required",
+//       });
+//     }
+
+//     // Handling uploaded branch images
+
+//     const imageUris = [];
+
+//     if (Array.isArray(branchImages) && branchImages.length > 0) {
 //       await Promise.all(
-//         BranchImages.map(async (image) => {
+//         branchImages.map(async (image) => {
 //           try {
 //             const fileUri = getDataUri(image);
 //             const cloudResponse = await cloudinary.uploader.upload(
@@ -35,54 +53,60 @@
 //                 folder: "BranchImages",
 //               }
 //             );
-//             BranchImageURI.push({
+//             imageUris.push({
 //               public_id: cloudResponse.public_id,
 //               url: cloudResponse.secure_url,
 //             });
 //           } catch (error) {
-//             console.log(`Error uploading branch image: ${error}`);
+//             console.error("Error uploading branch image:", error);
 //           }
 //         })
 //       );
 //     }
 
-//     console.log(BranchImageURI);
+//     console.log(imageUris);
 
-//     if (BranchImageURI.length === 0) {
+//     if (imageUris.length === 0) {
 //       return res.status(400).json({
 //         success: false,
 //         error: true,
 //         message: "Branch image is required",
 //       });
 //     }
-//     // ✅ Hash the password
 //     const hashedPassword = await bcrypt.hash(branchPassword, 10);
 
-//     // ✅ Create new branch
 //     const newBranch = new Branch({
 //       branchName,
 //       branchPassword: hashedPassword,
 //       address,
-//       branchImage: BranchImageURI,
+//       branchImage: imageUris, // Saving the uploaded image URIs
 //       branchCreateBy: staffData._id,
 //     });
 
-//     const savedBranch = await newBranch.save();
-//     const branchData = savedBranch.toObject();
-//     delete branchData.branchPassword; // ✅ Remove password before sending response
+//     staffData.totalBranch.push(newBranch._id);
+//     await staffData.save();
 
-//     return res.status(201).json({
+//     const savedBranch = await newBranch.save();
+//     const branchData = newBranch.toObject();
+//     delete branchData.branchPassword;
+
+//     const branchPopulated = await Branch.findById(branchData._id).populate(
+//       "Worker",
+//       "-password"
+//     );
+
+//     return res.status(200).json({
 //       success: true,
 //       error: false,
 //       message: "Branch created successfully",
 //       data: branchData,
 //     });
 //   } catch (error) {
-//     console.error(`Error in createNewBranch controller: ${error.message}`);
-//     return res.status(500).json({
+//     console.error("Error in createNewBranch controller:", error.message);
+//     return res.status(400).json({
 //       success: false,
 //       error: true,
-//       message: `Server error: ${error.message}`,
+//       message: `Error in createNewBranch controller: ${error}`,
 //     });
 //   }
 // };
@@ -96,8 +120,19 @@ import Worker from "../../models/user/worker/worker.models.js";
 export const createNewBranch = async (req, res) => {
   try {
     const { branchName, branchPassword, address } = req.body;
-    const existingBranch = await Branch.findOne({ branchName });
+    const branchImages = req.files;
 
+    // Validate required fields
+    if (!branchName || !branchPassword || !address) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "Branch name, password, and address are required",
+      });
+    }
+
+    // Check if branch already exists
+    const existingBranch = await Branch.findOne({ branchName });
     if (existingBranch) {
       return res.status(400).json({
         success: false,
@@ -106,31 +141,20 @@ export const createNewBranch = async (req, res) => {
       });
     }
 
+    // Verify admin permissions
     const staffId = req.staffId;
     const staffData = await Worker.findById(staffId);
-
     if (!staffData || staffData.role !== "Admin") {
-      return res.status(400).json({
+      return res.status(403).json({
         success: false,
         error: true,
         message: "Only admin can create a new branch",
       });
     }
 
-    if (!branchName || !branchPassword) {
-      return res.status(400).json({
-        success: false,
-        error: true,
-        message: "Branch name and password are required",
-      });
-    }
-
-    // Handling uploaded branch images
-    const branchImages = req.files?.branchImage || []; // Using array to get all uploaded files
+    // Handle branch images
     const imageUris = [];
-
     if (Array.isArray(branchImages) && branchImages.length > 0) {
-      // Upload each image to Cloudinary
       await Promise.all(
         branchImages.map(async (image) => {
           try {
@@ -152,41 +176,52 @@ export const createNewBranch = async (req, res) => {
       );
     }
 
+    // Ensure at least one image is uploaded
     if (imageUris.length === 0) {
       return res.status(400).json({
         success: false,
         error: true,
-        message: "Branch image is required",
+        message: "At least one branch image is required",
       });
     }
-    // Hashing the branch password
+
+    // Hash the branch password
     const hashedPassword = await bcrypt.hash(branchPassword, 10);
 
-    // Creating new branch record
+    // Create new branch
     const newBranch = new Branch({
       branchName,
       branchPassword: hashedPassword,
       address,
-      branchImage: imageUris, // Saving the uploaded image URIs
-      branchCreateBy: staffData._id,
+      branchImage: imageUris,
+      branchCreateBy: staffData._id, // Correct field name
     });
 
+    // Save the branch to the database
     const savedBranch = await newBranch.save();
-    const branchData = newBranch.toObject();
+
+    // Remove sensitive data before sending the response
+    const branchData = savedBranch.toObject();
     delete branchData.branchPassword;
 
-    return res.status(200).json({
+    // Populate the branchCreateBy field with admin details
+    const populatedBranch = await Branch.findById(branchData._id).populate(
+      "branchCreateBy", // Correct field name
+      "-password" // Exclude password field
+    );
+
+    return res.status(201).json({
       success: true,
       error: false,
       message: "Branch created successfully",
-      data: branchData,
+      data: populatedBranch,
     });
   } catch (error) {
-    console.error("Error in createNewBranch controller:", error);
-    return res.status(400).json({
+    console.error("Error in createNewBranch controller:", error.message);
+    return res.status(500).json({
       success: false,
       error: true,
-      message: `Error in createNewBranch controller: ${error}`,
+      message: "Internal server error",
     });
   }
 };

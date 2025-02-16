@@ -4,6 +4,41 @@ import cloudinary from "../../utils/cloudnary.js";
 import jwt from "jsonwebtoken";
 import Branch from "../../models/Branch/Branch.model.js";
 
+// Utility function to upload profile picture to Cloudinary
+const uploadProfilePic = async (file) => {
+  try {
+    const fileBase64 = `data:${file.mimetype};base64,${file.buffer.toString(
+      "base64"
+    )}`;
+    const cloudResponse = await cloudinary.uploader.upload(fileBase64, {
+      folder: "profilePic",
+    });
+    return cloudResponse.secure_url;
+  } catch (uploadErr) {
+    console.error("Cloudinary Upload Error:", uploadErr);
+    throw new Error("Failed to upload profile picture");
+  }
+};
+
+// Utility function to check if a user already exists
+const checkExistingUser = async (email, phoneNumber) => {
+  const existingUser = await Worker.findOne({
+    $or: [{ email }, { phoneNumber }],
+  });
+  return existingUser;
+};
+
+// Utility function to create a new user
+const createUser = async (userData) => {
+  const hashPassword = await bcrypt.hash(userData.password, 10);
+  const user = await Worker.create({
+    ...userData,
+    password: hashPassword,
+  });
+  return user;
+};
+
+// Staff Registration
 export const StaffRegister = async (req, res) => {
   try {
     const {
@@ -16,6 +51,17 @@ export const StaffRegister = async (req, res) => {
       branchName,
     } = req.body;
 
+    // Validate required fields
+    if (!fullName || !phoneNumber || !password || !branchName) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message:
+          "Full name, phone number, password, and branch name are required",
+      });
+    }
+
+    // Check if branch exists
     const branch = await Branch.findOne({ branchName });
     if (!branch) {
       return res.status(400).json({
@@ -25,34 +71,8 @@ export const StaffRegister = async (req, res) => {
       });
     }
 
-    if (!fullName) {
-      return res.status(400).json({
-        success: false,
-        error: true,
-        message: "Full name is required",
-      });
-    }
-
-    if (!phoneNumber) {
-      return res.status(400).json({
-        success: false,
-        error: true,
-        message: "Phone number is required",
-      });
-    }
-
-    if (!password) {
-      return res.status(400).json({
-        success: false,
-        error: true,
-        message: "Password is required",
-      });
-    }
-
-    const existingStaff = await Worker.findOne({
-      $or: [{ email }, { phoneNumber }],
-    });
-
+    // Check if staff already exists
+    const existingStaff = await checkExistingUser(email, phoneNumber);
     if (existingStaff) {
       return res.status(400).json({
         success: false,
@@ -63,46 +83,31 @@ export const StaffRegister = async (req, res) => {
       });
     }
 
+    // Upload profile picture if provided
     let profilePicURI = null;
     if (req.file) {
-      try {
-        const fileBase64 = `data:${
-          req.file.mimetype
-        };base64,${req.file.buffer.toString("base64")}`;
-        const cloudResponse = await cloudinary.uploader.upload(fileBase64, {
-          folder: "profilePic",
-        });
-        profilePicURI = cloudResponse.secure_url;
-      } catch (uploadErr) {
-        console.error("Cloudinary Upload Error:", uploadErr);
-        return res.status(500).json({
-          success: false,
-          error: true,
-          message: "Failed to upload profile picture",
-        });
-      }
+      profilePicURI = await uploadProfilePic(req.file);
     }
 
-    const hashPassword = await bcrypt.hash(password, 10);
-
-    const staff = await Worker.create({
+    // Create staff
+    const staff = await createUser({
       fullName,
       email,
       phoneNumber,
-      password: hashPassword,
+      password,
       address,
       profilePic: profilePicURI,
       role,
       BranchId: branch._id,
     });
 
-    const { password: _, ...staffData } = staff.toObject();
-
+    // Populate branch details
     const populatedStaff = await Worker.findById(staff._id).populate(
       "BranchId",
       "branchName address branchImage"
     );
 
+    // Add staff to branch if applicable
     if (
       populatedStaff.role === "Manager" ||
       populatedStaff.role === "MonthlySalaryWorkers" ||
@@ -114,11 +119,14 @@ export const StaffRegister = async (req, res) => {
       await branch.save();
     }
 
+    // Remove password from response
+    const { password: _, ...staffData } = populatedStaff.toObject();
+
     res.status(201).json({
       success: true,
       error: false,
       message: `${fullName} registered successfully`,
-      data: populatedStaff,
+      data: staffData,
     });
   } catch (err) {
     console.error(`Error in StaffRegister:`, err);
@@ -126,6 +134,68 @@ export const StaffRegister = async (req, res) => {
       success: false,
       error: true,
       message: "An unexpected error occurred while registering staff",
+    });
+  }
+};
+
+// Admin Registration
+export const AdminRegister = async (req, res) => {
+  try {
+    const { fullName, email, phoneNumber, password, address } = req.body;
+
+    // Validate required fields
+    if (!fullName || !email || !phoneNumber || !password || !address) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "All fields are required",
+      });
+    }
+
+    // Check if admin already exists
+    const existingAdmin = await checkExistingUser(email, phoneNumber);
+    if (existingAdmin) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: `Admin with email ${
+          email || ""
+        } or phone number ${phoneNumber} already exists`,
+      });
+    }
+
+    // Upload profile picture if provided
+    let profilePicURI = null;
+    if (req.file) {
+      profilePicURI = await uploadProfilePic(req.file);
+    }
+
+    // Create admin
+    const admin = await createUser({
+      fullName,
+      email,
+      phoneNumber,
+      password,
+      address,
+      profilePic: profilePicURI,
+      role: "Admin",
+    });
+
+    // Remove password from response
+    const { password: _, ...adminData } = admin.toObject();
+
+    res.status(201).json({
+      success: true,
+      error: false,
+      message: `${fullName} registered successfully`,
+      data: adminData,
+    });
+  } catch (err) {
+    console.error(`Error in AdminRegister:`, err);
+    res.status(500).json({
+      success: false,
+      error: true,
+      message: "An unexpected error occurred while registering admin",
     });
   }
 };
@@ -206,4 +276,209 @@ export const StaffLogin = async (req, res) => {
   }
 };
 
+// import Worker from "../../models/user/worker/worker.models.js";
+// import bcrypt from "bcrypt";
+// import cloudinary from "../../utils/cloudnary.js";
+// import jwt from "jsonwebtoken";
+// import Branch from "../../models/Branch/Branch.model.js";
 
+// export const StaffRegister = async (req, res) => {
+//   try {
+//     const {
+//       fullName,
+//       email,
+//       phoneNumber,
+//       password,
+//       address,
+//       role,
+//       branchName,
+//     } = req.body;
+
+//     const branch = await Branch.findOne({ branchName });
+//     if (!branch) {
+//       return res.status(400).json({
+//         success: false,
+//         error: true,
+//         message: "Branch not found",
+//       });
+//     }
+
+//     if (!fullName) {
+//       return res.status(400).json({
+//         success: false,
+//         error: true,
+//         message: "Full name is required",
+//       });
+//     }
+
+//     if (!phoneNumber) {
+//       return res.status(400).json({
+//         success: false,
+//         error: true,
+//         message: "Phone number is required",
+//       });
+//     }
+
+//     if (!password) {
+//       return res.status(400).json({
+//         success: false,
+//         error: true,
+//         message: "Password is required",
+//       });
+//     }
+
+//     const existingStaff = await Worker.findOne({
+//       $or: [{ email }, { phoneNumber }],
+//     });
+
+//     if (existingStaff) {
+//       return res.status(400).json({
+//         success: false,
+//         error: true,
+//         message: `Staff with email ${
+//           email || ""
+//         } or phone number ${phoneNumber} already exists`,
+//       });
+//     }
+
+//     let profilePicURI = null;
+//     if (req.file) {
+//       try {
+//         const fileBase64 = `data:${
+//           req.file.mimetype
+//         };base64,${req.file.buffer.toString("base64")}`;
+//         const cloudResponse = await cloudinary.uploader.upload(fileBase64, {
+//           folder: "profilePic",
+//         });
+//         profilePicURI = cloudResponse.secure_url;
+//       } catch (uploadErr) {
+//         console.error("Cloudinary Upload Error:", uploadErr);
+//         return res.status(500).json({
+//           success: false,
+//           error: true,
+//           message: "Failed to upload profile picture",
+//         });
+//       }
+//     }
+
+//     const hashPassword = await bcrypt.hash(password, 10);
+
+//     const staff = await Worker.create({
+//       fullName,
+//       email,
+//       phoneNumber,
+//       password: hashPassword,
+//       address,
+//       profilePic: profilePicURI,
+//       role,
+//       BranchId: branch._id,
+//     });
+
+//     const { password: _, ...staffData } = staff.toObject();
+
+//     const populatedStaff = await Worker.findById(staff._id).populate(
+//       "BranchId",
+//       "branchName address branchImage"
+//     );
+
+//     if (
+//       populatedStaff.role === "Manager" ||
+//       populatedStaff.role === "MonthlySalaryWorkers" ||
+//       populatedStaff.role === "DailyWageWorkers" ||
+//       populatedStaff.role === "ProjectBasedWorkers" ||
+//       populatedStaff.role === "DeliveryBoy"
+//     ) {
+//       branch.BranchStaff.push(staff._id);
+//       await branch.save();
+//     }
+
+//     res.status(201).json({
+//       success: true,
+//       error: false,
+//       message: `${fullName} registered successfully`,
+//       data: populatedStaff,
+//     });
+//   } catch (err) {
+//     console.error(`Error in StaffRegister:`, err);
+//     res.status(500).json({
+//       success: false,
+//       error: true,
+//       message: "An unexpected error occurred while registering staff",
+//     });
+//   }
+// };
+
+// export const AdminRegister = async (req, res) => {
+//   try {
+//     const { fullName, email, phoneNumber, password, address, role } = req.body;
+//     if (!fullName || !email || !phoneNumber || !password || !address || !role) {
+//       return res.status(400).json({
+//         success: false,
+//         error: true,
+//         message: "All fields are required",
+//       });
+//     }
+//     const existingAdmin = await Worker.findOne({
+//       $or: [{ email }, { phoneNumber }],
+//     });
+
+//     if (existingAdmin) {
+//       return res.status(400).json({
+//         success: false,
+//         error: true,
+//         message: `Admin with email ${
+//           email || ""
+//         } or phone number ${phoneNumber} already exists`,
+//       });
+//     }
+//     let profilePicURI = null;
+//     if (req.file) {
+//       try {
+//         const fileBase64 = `data:${
+//           req.file.mimetype
+//         };base64,${req.file.buffer.toString("base64")}`;
+//         const cloudResponse = await cloudinary.uploader.upload(fileBase64, {
+//           folder: "profilePic",
+//         });
+//         profilePicURI = cloudResponse.secure_url;
+//       } catch (uploadErr) {
+//         console.error("Cloudinary Upload Error:", uploadErr);
+//         return res.status(500).json({
+//           success: false,
+//           error: true,
+//           message: "Failed to upload profile picture",
+//         });
+//       }
+//     }
+//     const hashPassword = await bcrypt.hash(password, 10);
+//     const admin = await Worker.create({
+//       fullName,
+//       email,
+//       phoneNumber,
+//       password: hashPassword,
+//       address,
+//       profilePic: profilePicURI,
+//       role,
+//     });
+//     const { password: _, ...staffData } = staff.toObject();
+
+//     const populatedStaff = await Worker.findById(staff._id).populate(
+//       "BranchId",
+//       "branchName address branchImage"
+//     );
+
+//     res.status(201).json({
+//       success: true,
+//       error: false,
+//       message: `${fullName} registered successfully`,
+//       data: populatedStaff,
+//     });
+//   } catch (err) {
+//     console.error(`Error in AdminLogin:`, err);
+//     res.status(500).json({
+//       success: false,
+//       error: true,
+//       message: "An unexpected error occurred while logging in admin",
+//     });
+//   }
+// };

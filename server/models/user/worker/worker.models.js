@@ -228,6 +228,15 @@ const WorkerSchema = new mongoose.Schema(
     resetPasswordToken: {
       type: String,
     },
+    vechalId: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Bechal",
+        required: function () {
+          return this.role === "DeliveryBoy";
+        },
+      },
+    ],
   },
   {
     timestamps: true,

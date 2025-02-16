@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 const VehiclesSchema = new mongoose.Schema(
   {
     BranchId: {
@@ -7,8 +8,15 @@ const VehiclesSchema = new mongoose.Schema(
     vehicleType: {
       type: String,
       enum: ["Car", "Truck"],
-      default: "Car",
+      default: "Truck",
     },
+    vehicleCreatedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Worker",
+      },
+    ],
+
     vehicleNumber: {
       type: String,
       unique: true,
@@ -17,16 +25,23 @@ const VehiclesSchema = new mongoose.Schema(
     vehicleDriver: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Worker",
+      required: [true, "Vehicle driver is required"],
     },
     vehicleDescription: {
       type: String,
       default: "",
       max: [500, "Vehicle description must be less than 500 characters"],
     },
-    vehicleImage: {
-      type: [String],
-      default: [],
-    },
+    vehicleImage: [
+      {
+        public_id: {
+          type: String,
+        },
+        url: {
+          type: String,
+        },
+      },
+    ],
     status: {
       type: String,
       enum: ["Active", "Inactive"],

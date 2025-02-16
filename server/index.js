@@ -28,7 +28,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1/ad_furniture/staff/auth", staffAuthRouter);
 app.use("/api/v1/ad_furniture/branch", BranchRouter);
 app.use("/api/v1/ad_furniture/invoices", invoiceRouter);
-app.use("/api/v1/ad_furniture/product",  productRouter);
+app.use("/api/v1/ad_furniture/product", productRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);

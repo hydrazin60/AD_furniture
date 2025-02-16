@@ -1,13 +1,16 @@
+import mongoose from "mongoose";
 const ProductSchema = new mongoose.Schema(
   {
     productName: {
       type: String,
       required: [true, "Product name is required"],
     },
-    productImage: {
-      type: [String],
-      default: [],
-    },
+    productImage: [
+      {
+        public_id: String,
+        url: String,
+      },
+    ],
     productDescription: {
       type: String,
       default: "",
@@ -39,7 +42,7 @@ const ProductSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    workerId: {
+    ProductUploadedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Worker",
     },

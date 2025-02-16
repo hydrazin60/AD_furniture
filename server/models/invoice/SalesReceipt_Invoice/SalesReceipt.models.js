@@ -7,6 +7,12 @@ const SalesReceiptSchema = new mongoose.Schema(
       ref: "Branch",
       required: true,
     },
+    salesReceiptCreatedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Worker",
+      },
+    ],
     CustomerName: {
       type: String,
       required: [true, "Customer name is required"],
@@ -33,6 +39,18 @@ const SalesReceiptSchema = new mongoose.Schema(
         ref: "Product",
       },
     ],
+    quantity: {
+      type: Number,
+      default: 1,
+    },
+    discount: {
+      type: Number,
+      default: 0,
+    },
+    unitPrice: {
+      type: Number,
+      required: [true, "Unit price is required"],
+    },
     totalAmount: {
       type: Number,
       default: 0,

@@ -11,4 +11,4 @@ SupplierRoutes.post(
   createNewSupplier
 );
 
-export default  SupplierRoutes;
+export default SupplierRoutes;

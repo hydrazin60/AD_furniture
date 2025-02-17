@@ -1,6 +1,7 @@
+import mongoose from "mongoose";
 const CustomerSchema = new mongoose.Schema(
   {
-    companyName: {
+    customerName: {
       type: String,
       required: [true, "Full name is required"],
       min: [2, "Full name must be more than 2 characters"],
@@ -19,6 +20,10 @@ const CustomerSchema = new mongoose.Schema(
         },
       },
     ],
+    companyName: {
+      type: String,
+      default: "",
+    },
     companyWebsite: {
       type: String,
       default: "",
@@ -34,6 +39,9 @@ const CustomerSchema = new mongoose.Schema(
     email: {
       type: String,
       unique: true,
+      trim: true,
+      required: [true, "Email is required"],
+      match: [/^\S+@\S+\.\S+$/, "Please enter a valid email"],
     },
     customerCategory: {
       type: String,
@@ -88,6 +96,20 @@ const CustomerSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    customerCreateBy :{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Worker",
+    },
+    BranchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+    },
+    totalInvoice: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "SalesReceipt",
+      },
+    ],
   },
 
   {

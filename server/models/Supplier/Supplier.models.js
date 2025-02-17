@@ -2,12 +2,26 @@ import mongoose from "mongoose";
 
 const SupplierSchema = new mongoose.Schema(
   {
-    companyName: {
+    SupplierName: {
       type: String,
       minlength: [2, "Company name must be more than 2 characters"],
       maxlength: [50, "Company name must be less than 50 characters"],
       required: true,
     },
+    BranchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch",
+    },
+    companyName: {
+      type: String,
+      default: "",
+    },
+    supplierCreateBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Worker",
+      },
+    ],
     description: {
       type: String,
       default: "",
@@ -72,13 +86,20 @@ const SupplierSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    totalPurchaseInvoice: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "PurchaseInvoice",
+      },
+    ],
   },
   {
     timestamps: true,
   }
 );
 
-export default mongoose.model("Supplier", SupplierSchema);
+const Supplier = mongoose.model("Supplier", SupplierSchema);
+export default Supplier;
 
 // import mongoose from "mongoose";
 // const SupplierSchema = new mongoose.Schema(

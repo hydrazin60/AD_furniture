@@ -8,6 +8,8 @@ import BranchRouter from "./routes/Branch/Branch.routes.js";
 import invoiceRouter from "./routes/invoices/invoices.routes.js";
 import productRouter from "./routes/product/product.routes.js";
 import VehiclesRouter from "./routes/Vehicles/Vehicles.routes.js";
+import SupplierRoutes from "./routes/Supplier/Supplier.routes.js";
+import customerRouter from "./routes/customer/Customer.routes.js";
 
 dotenv.config();
 const app = express();
@@ -32,6 +34,8 @@ app.use("/api/v1/ad_furniture/branch", BranchRouter);
 app.use("/api/v1/ad_furniture/invoices", invoiceRouter);
 app.use("/api/v1/ad_furniture/product", productRouter);
 app.use("/api/v1/ad_furniture/vehicles", VehiclesRouter);
+app.use("/api/v1/ad_furniture/supplier", SupplierRoutes);
+app.use("/api/v1/ad_furniture/customer", customerRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);

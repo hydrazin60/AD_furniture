@@ -10,10 +10,18 @@ const CustomerSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    companyImage: {
-      type: [String],
-      default: [],
-    },
+    companyImage: [
+      {
+        public_id: {
+          type: String,
+          required: true,
+        },
+        url: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
     companyWebsite: {
       type: String,
       default: "",
@@ -84,6 +92,7 @@ const CustomerSchema = new mongoose.Schema(
       default: "",
     },
   },
+
   {
     timestamps: true,
   }

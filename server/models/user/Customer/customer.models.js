@@ -1,15 +1,12 @@
 const CustomerSchema = new mongoose.Schema(
   {
-    fullName: {
+    companyName: {
       type: String,
       required: [true, "Full name is required"],
       min: [2, "Full name must be more than 2 characters"],
       max: [50, "Full name must be less than 50 characters"],
     },
-    companyName: {
-      type: String,
-      default: "",
-    },
+
     companyImage: [
       {
         public_id: {

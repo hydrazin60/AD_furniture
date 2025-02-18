@@ -181,7 +181,6 @@ export const AdminRegister = async (req, res) => {
       role: "Admin",
     });
 
-    // Remove password from response
     const { password: _, ...adminData } = admin.toObject();
 
     res.status(201).json({
@@ -199,6 +198,7 @@ export const AdminRegister = async (req, res) => {
     });
   }
 };
+
 export const StaffLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -237,14 +237,16 @@ export const StaffLogin = async (req, res) => {
       "_id branchName address branchImage numberOfWorkers rawMaterials vehicles"
     );
 
-    if (!populatedStaff.BranchId) {
-      return res.status(400).json({
-        success: false,
-        error: true,
-        message: "Branch information not found for this staff",
-      });
+    if (populatedStaff.role !== "Admin") {
+      if (!populatedStaff.BranchId) {
+        return res.status(400).json({
+          success: false,
+          error: true,
+          message: "Branch information not found for this staff",
+        });
+      }
+      staffData.BranchId = populatedStaff.BranchId;
     }
-    staffData.BranchId = populatedStaff.BranchId;
 
     const token = jwt.sign({ staffId: staff._id }, process.env.JWT_SECRET, {
       expiresIn: "1d",

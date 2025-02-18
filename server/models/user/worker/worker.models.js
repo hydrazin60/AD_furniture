@@ -198,6 +198,9 @@ const WorkerSchema = new mongoose.Schema(
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Branch",
+        required: function () {
+          return this.role === "Admin";
+        },
       },
     ],
     BranchId: {
@@ -228,6 +231,7 @@ const WorkerSchema = new mongoose.Schema(
     resetPasswordToken: {
       type: String,
     },
+
 
     Attendance: [
       {

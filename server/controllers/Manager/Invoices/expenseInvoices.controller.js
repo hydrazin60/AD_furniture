@@ -359,7 +359,7 @@ export const getOneExpenseInvoice = async (req, res) => {
     });
   }
 };
-
+// only Admin
 export const deleteExpenseInvoice = async (req, res) => {
   try {
     const AutherId = req.staffId;
@@ -376,6 +376,20 @@ export const deleteExpenseInvoice = async (req, res) => {
         success: false,
         error: true,
         message: "Invalid expenseInvoiceId",
+      });
+    }
+    if (!expenseInvoiceId) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "Invalid expenseInvoiceId",
+      });
+    }
+    if (!AutherId) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "Invalid AutherId",
       });
     }
     const AutherData = await Worker.findById(AutherId);
@@ -395,16 +409,24 @@ export const deleteExpenseInvoice = async (req, res) => {
       });
     }
 
-    const ExpenseInvoiceData = await ExpenseInvoice.findByIdAndDelete(
+    const deletedExpenseInvoice = await ExpenseInvoice.findById(
       expenseInvoiceId
     );
+    if (!deletedExpenseInvoice) {
+      return res.status(404).json({
+        success: false,
+        error: true,
+        message: "Expense invoice not found",
+      });
+    }
+
+    await ExpenseInvoice.findByIdAndDelete(expenseInvoiceId);
     return res.status(200).json({
       success: true,
       error: false,
       message: `Expense invoice deleted successfully`,
-      data: ExpenseInvoiceData,
+      data: deletedExpenseInvoice,
     });
-    
   } catch (error) {
     console.log(` error in deleting expense invoice: ${error}`);
     return res.status(500).json({
@@ -414,3 +436,4 @@ export const deleteExpenseInvoice = async (req, res) => {
     });
   }
 };
+

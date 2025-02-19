@@ -9,6 +9,7 @@ export const GetOneStaffData = async (req, res) => {
     const AutherId = req.staffId;
 
     // Validate staffId
+
     if (!staffId) {
       return res.status(400).json({
         success: false,

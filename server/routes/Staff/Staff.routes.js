@@ -17,4 +17,5 @@ StaffRouter.put(
   uploadSingleImage("profilePic"),
   UpdateStaffData
 );
+
 export default StaffRouter;

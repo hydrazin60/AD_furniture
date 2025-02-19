@@ -10,6 +10,7 @@ export const createNewBranch = async (req, res) => {
     const branchImages = req.files;
 
     // Validate required fields
+    // 
     if (!branchName || !branchPassword || !address) {
       return res.status(400).json({
         success: false,

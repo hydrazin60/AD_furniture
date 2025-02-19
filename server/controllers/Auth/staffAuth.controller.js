@@ -3,8 +3,7 @@ import bcrypt from "bcrypt";
 import cloudinary from "../../utils/cloudnary.js";
 import jwt from "jsonwebtoken";
 import Branch from "../../models/Branch/Branch.model.js";
-
-// Utility function to upload profile picture to Cloudinary
+ 
 const uploadProfilePic = async (file) => {
   try {
     const fileBase64 = `data:${file.mimetype};base64,${file.buffer.toString(
@@ -26,7 +25,7 @@ const checkExistingUser = async (email, phoneNumber) => {
     $or: [{ email }, { phoneNumber }],
   });
   return existingUser;
-};
+};  
 
 // Utility function to create a new user
 const createUser = async (userData) => {

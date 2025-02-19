@@ -3,6 +3,7 @@ import SalesReceipt from "../../../models/invoice/SalesReceipt_Invoice/SalesRece
 import Product from "../../../models/product/FinalProduct/Product.models.js";
 import Worker from "../../../models/user/worker/worker.models.js";
 
+
 export const CreateSalesReceiptInvoice = async (req, res) => {
   try {
     const { staffId: AutherId } = req;

@@ -13,10 +13,7 @@ import customerRouter from "./routes/customer/Customer.routes.js";
 import SalaryRouter from "./routes/Salary/Salary.routes.js";
 import AttendanceRouter from "./routes/Attendance/Attendance.routes.js";
 import TodoListRouter from "./routes/TodoListProject/TodoList.routes.js";
-
-
-
-
+// import StaffRouter from "./routes/Staff/Staff.routes.js";
 
 dotenv.config();
 const app = express();
@@ -45,7 +42,7 @@ app.use("/api/v1/ad_furniture/customer", customerRouter);
 app.use("/api/v1/ad_furniture/attendance", AttendanceRouter);
 app.use("/api/v1/ad_furniture/salary", SalaryRouter);
 app.use("/api/v1/ad_furniture/todolist", TodoListRouter);
-
+//// app.use("/api/v1/ad_furniture/staff/controller", StaffRouter);
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${process.env.PORT}`);

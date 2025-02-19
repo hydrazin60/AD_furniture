@@ -109,6 +109,120 @@ export const createNewBranch = async (req, res) => {
   }
 };
 
+export const updateBranch = async (req, res) => {
+  try {
+    const branchId = req.params.branchId;
+    const AutherId = req.staffId;
+    const { branchName, branchPassword, address } = req.body;
+    const branchImages = req.files;
+
+    console.log(req.files);
+    console.log(req.body);
+
+    if (!branchId || !AutherId) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "branchId and AutherId are required",
+      });
+    }
+
+    const Auther = await Worker.findById(AutherId);
+    if (!Auther) {
+      return res.status(404).json({
+        success: false,
+        error: true,
+        message: "Author ID not found",
+      });
+    }
+
+    if (Auther.role !== "Manager" && Auther.role !== "Admin") {
+      return res.status(403).json({
+        success: false,
+        error: true,
+        message: "Only manager and admin can update a branch",
+      });
+    }
+
+    const branchData = await Branch.findById(branchId);
+    if (!branchData) {
+      return res.status(404).json({
+        success: false,
+        error: true,
+        message: "Branch not found",
+      });
+    }
+
+    if (Auther.role !== "Admin") {
+      if (Auther._id.toString() !== branchData.branchCreateBy.toString()) {
+        return res.status(403).json({
+          success: false,
+          error: true,
+          message: "Unauthorized to update this branch",
+        });
+      }
+    }
+
+    const imageUris = [];
+    if (Array.isArray(req.files) && req.files.length > 0) {
+      await Promise.all(
+        branchImages.map(async (image) => {
+          try {
+            const fileUri = getDataUri(image);
+            const cloudResponse = await cloudinary.uploader.upload(
+              fileUri.content,
+              {
+                folder: "BranchImages",
+              }
+            );
+            imageUris.push({
+              public_id: cloudResponse.public_id,
+              url: cloudResponse.secure_url,
+            });
+          } catch (error) {
+            console.error("Error uploading branch image:", error);
+          }
+        })
+      );
+    }
+
+    let hashedPassword;
+    if (branchPassword) {
+      hashedPassword = await bcrypt.hash(branchPassword, 10);
+    }
+
+    const updatedBranch = await Branch.findByIdAndUpdate(
+      branchId,
+      {
+        branchName,
+        branchPassword: hashedPassword || branchData.branchPassword, // Use existing password if not provided
+        address,
+        branchImage: imageUris.length > 0 ? imageUris : branchData.branchImage, // Use existing images if no new ones are uploaded
+      },
+      { new: true }
+    );
+
+    const populatedBranch = await Branch.findById(updatedBranch._id).populate(
+      "branchCreateBy",
+      "-password"
+    );
+
+    return res.status(200).json({
+      success: true,
+      error: false,
+      message: "Branch updated successfully",
+      data: populatedBranch,
+    });
+  } catch (error) {
+    console.error("Error in updateBranch controller:", error.message);
+    return res.status(500).json({
+      success: false,
+      error: true,
+      message: "Internal server error",
+    });
+  }
+};
+
 export const getAllBranchBtAdmin = async (req, res) => {
   try {
     const AuterId = req.staffId;
@@ -134,7 +248,7 @@ export const getAllBranchBtAdmin = async (req, res) => {
         message: "Only admin can get all branches",
       });
     }
-    
+
     const BranchData = await Branch.find().populate(
       "branchCreateBy",
       "-password"
@@ -208,6 +322,57 @@ export const GetObeBranchDetailsByBothAdminANdManager = async (req, res) => {
       "Error in GetObeBranchByBothAdminANdManager controller:",
       error.message
     );
+    return res.status(500).json({
+      success: false,
+      error: true,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const deleteBranch = async (req, res) => {
+  try {
+    const branchId = req.params.branchId;
+    const AutherId = req.staffId;
+    if (!branchId || !AutherId) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "branchId and AutherId are required",
+      });
+    }
+    const Auther = await Worker.findById(AutherId);
+    if (!Auther) {
+      return res.status(404).json({
+        success: false,
+        error: true,
+        message: "Author ID not found",
+      });
+    }
+    if (Auther.role !== "Admin") {
+      return res.status(403).json({
+        success: false,
+        error: true,
+        message: "Only admin can delete a branch",
+      });
+    }
+
+    const branchData = await Branch.findById(branchId);
+    if (!branchData) {
+      return res.status(404).json({
+        success: false,
+        error: true,
+        message: "Branch not found",
+      });
+    }
+    await Branch.findByIdAndDelete(branchId);
+    return res.status(200).json({
+      success: true,
+      error: false,
+      message: "Branch deleted successfully",
+    });
+  } catch (error) {
+    console.error("Error in deleteBranch controller:", error.message);
     return res.status(500).json({
       success: false,
       error: true,

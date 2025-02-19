@@ -19,7 +19,6 @@ const uploadProfilePic = async (file) => {
   }
 };
 
-// Utility function to check if a user already exists
 const checkExistingUser = async (email, phoneNumber) => {
   const existingUser = await Worker.findOne({
     $or: [{ email }, { phoneNumber }],

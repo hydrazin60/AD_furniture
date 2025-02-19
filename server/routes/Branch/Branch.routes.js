@@ -1,8 +1,10 @@
 import express from "express";
 import {
   createNewBranch,
+  deleteBranch,
   getAllBranchBtAdmin,
   GetObeBranchDetailsByBothAdminANdManager,
+  updateBranch,
 } from "../../controllers/Branch/Branch.controller.js";
 import { isAuthenticated } from "../../middleware/isAuthenticated.js";
 import { uploadMultipleImages } from "../../middleware/multer.js";
@@ -20,5 +22,12 @@ BranchRouter.get(
   isAuthenticated,
   GetObeBranchDetailsByBothAdminANdManager
 );
+BranchRouter.put(
+  "/update/branch/:branchId",
+  isAuthenticated,
+  uploadMultipleImages("branchImage", 6),
+  updateBranch
+);
 
+BranchRouter.delete("/delete/branch/:branchId", isAuthenticated, deleteBranch);
 export default BranchRouter;

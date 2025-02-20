@@ -1,6 +1,13 @@
 import express from "express";
 import { isAuthenticated } from "../../middleware/isAuthenticated.js";
-import { createNewTodoListProject } from "../../controllers/TodoListProject/TodoListProject.controller.js";
+import {
+  createNewTodoListProject,
+  DeleteTodoListProject,
+  getAllTodoListProject,
+  GetOneTodolistProjectDetails,
+  UpdateTodoListProject,
+  UpdateTodoListProjectStatus,
+} from "../../controllers/TodoListProject/TodoListProject.controller.js";
 const TodoListRouter = express.Router();
 
 TodoListRouter.post(
@@ -8,5 +15,30 @@ TodoListRouter.post(
   isAuthenticated,
   createNewTodoListProject
 );
+TodoListRouter.get(
+  "/get/all_project/:branchId",
+  isAuthenticated,
+  getAllTodoListProject
+);
 
+TodoListRouter.get(
+  "/get/one_project/:todoListProjectId",
+  isAuthenticated,
+  GetOneTodolistProjectDetails
+);
+TodoListRouter.delete(
+  "/delete/one_project/:todoListProjectId",
+  isAuthenticated,
+  DeleteTodoListProject
+);
+TodoListRouter.put(
+  "/update/one_project/:todoListProjectId",
+  isAuthenticated,
+  UpdateTodoListProject
+);
+TodoListRouter.post(
+  "/todolist/update_project/status/:todoListProjectId",
+  isAuthenticated,
+  UpdateTodoListProjectStatus
+);
 export default TodoListRouter;

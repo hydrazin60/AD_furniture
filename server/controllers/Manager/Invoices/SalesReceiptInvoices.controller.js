@@ -276,7 +276,6 @@ export const UpdateSalesReceiptInvoice = async (req, res) => {
     });
   }
 };
-
 // only Admin
 export const getAllSalesReceiptInvoice = async (req, res) => {
   try {

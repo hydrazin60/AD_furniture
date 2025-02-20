@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Branch from "../../../models/Branch/Branch.model.js";
 import Supplier from "../../../models/Supplier/Supplier.models.js";
 import Worker from "../../../models/user/worker/worker.models.js";
@@ -85,85 +86,372 @@ export const createNewSupplier = async (req, res) => {
     });
   }
 };
-// import Branch from "../../../models/Branch/Branch.model.js";
-// import Supplier from "../../../models/Supplier/Supplier.models.js";
-// import Worker from "../../../models/user/worker/worker.models.js";
-// export const createNewSupplier = async (req, res) => {
+
+export const getAllSuppliers = async (req, res) => {
+  try {
+    const AutherId = req.staffId;
+
+    if (!mongoose.Types.ObjectId.isValid(AutherId) || !AutherId) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "Invalid AutherId",
+      });
+    }
+    const AutherData = await Worker.findById(AutherId);
+    if (!AutherData) {
+      return res.status(404).json({
+        success: false,
+        error: true,
+        message: "Author not found",
+      });
+    }
+    if (AutherData.role !== "Admin" && AutherData.role !== "Manager") {
+      return res.status(403).json({
+        success: false,
+        error: true,
+        message: "You are not authorized to get all suppliers",
+      });
+    }
+
+    const AllSuppliers = await Supplier.find()
+      .populate("BranchId", "branchName address branchPhoneNumber")
+      .populate("supplierCreateBy", "fullName ");
+
+    return res.status(200).json({
+      success: true,
+      error: false,
+      message: "Suppliers fetched successfully",
+      Suppliers: AllSuppliers,
+    });
+  } catch (error) {
+    console.log(`error show in get all supplier: ${error}`);
+    return res.status(500).json({
+      success: false,
+      error: true,
+      message: `error show in get all supplier ${error.message}`,
+    });
+  }
+};
+
+export const getOneSupplierData = async (req, res) => {
+  try {
+    const AutherId = req.staffId;
+    const supplierId = req.params.supplierId;
+    if (!mongoose.Types.ObjectId.isValid(AutherId) || !AutherId) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "Invalid AutherId",
+      });
+    }
+    if (!mongoose.Types.ObjectId.isValid(supplierId) || !supplierId) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "Invalid supplierId",
+      });
+    }
+
+    const AutherData = await Worker.findById(AutherId);
+    if (!AutherData) {
+      return res.status(404).json({
+        success: false,
+        error: true,
+        message: "Author not found",
+      });
+    }
+    if (AutherData.role !== "Admin" && AutherData.role !== "Manager") {
+      return res.status(403).json({
+        success: false,
+        error: true,
+        message: "You are not authorized to get one supplier",
+      });
+    }
+    const OneSupplier = await Supplier.findById(supplierId)
+      .populate("BranchId", "branchName address branchPhoneNumber")
+      .populate("supplierCreateBy", "fullName ")
+      .populate("totalPurchaseInvoice");
+    return res.status(200).json({
+      success: true,
+      error: false,
+      message: "Supplier fetched successfully",
+      Supplier: OneSupplier,
+    });
+  } catch (error) {
+    console.log(`error show in get one supplier: ${error}`);
+    return res.status(500).json({
+      success: false,
+      error: true,
+      message: `error show in get one supplier ${error.message}`,
+    });
+  }
+};
+
+export const DeleteSupplier = async (req, res) => {
+  try {
+    const AutherId = req.staffId;
+    const supplierId = req.params.supplierId;
+
+    if (!mongoose.Types.ObjectId.isValid(AutherId) || !AutherId) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "Invalid AutherId",
+      });
+    }
+    if (!mongoose.Types.ObjectId.isValid(supplierId) || !supplierId) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "Invalid supplierId",
+      });
+    }
+    const AutherData = await Worker.findById(AutherId);
+    if (!AutherData) {
+      return res.status(404).json({
+        success: false,
+        error: true,
+        message: "Author not found",
+      });
+    }
+    const SupplierData = await Supplier.findById(supplierId);
+    if (!SupplierData) {
+      return res.status(404).json({
+        success: false,
+        error: true,
+        message: "Supplier not found",
+      });
+    }
+
+    if (AutherData.role !== "Admin" && AutherData.role !== "Manager") {
+      return res.status(403).json({
+        success: false,
+        error: true,
+        message: "You are not authorized to delete supplier",
+      });
+    }
+    if (AutherData.role !== "Admin") {
+      const BranchId = AutherData.BranchId;
+      if (BranchId.toString() !== SupplierData.BranchId.toString()) {
+        return res.status(403).json({
+          success: false,
+          error: true,
+          message: "You are not authorized to delete supplier",
+        });
+      }
+    }
+
+    const DeleteSupplier = await Supplier.findByIdAndDelete(supplierId);
+    return res.status(200).json({
+      success: true,
+      error: false,
+      message: "Supplier deleted successfully",
+      Supplier: DeleteSupplier,
+    });
+  } catch (error) {
+    console.log(`error show in delete supplier: ${error}`);
+    return res.status(500).json({
+      success: false,
+      error: true,
+      message: `error show in delete supplier ${error.message}`,
+    });
+  }
+};
+
+// export const UpdateSupplier = async (req, res) => {
 //   try {
-//     const authorId = req.staffId;
-//     const branchId = req.params.branchId;
+//     const AutherId = req.staffId;
+//     const supplierId = req.params.supplierId;
 //     const {
-//       companyName,
+//       SupplierName,
 //       description,
 //       phoneNumber,
 //       mobileNumbers,
+//       companyName,
 //       email,
 //       address,
 //       paymentMethod,
 //       note,
 //     } = req.body;
-//     if (!companyName || !phoneNumber || !email) {
+//     if (!mongoose.Types.ObjectId.isValid(AutherId) || !AutherId) {
 //       return res.status(400).json({
 //         success: false,
 //         error: true,
-//         message: "Company name, phone number, and email are required",
+//         message: "Invalid AutherId",
 //       });
 //     }
-//     const author = await Worker.findById(authorId);
-//     const branch = await Branch.findById(branchId);
-//     if (author.role === "Manager") {
-//       if (!branch) {
-//         return res.status(404).json({
+//     if (!mongoose.Types.ObjectId.isValid(supplierId) || !supplierId) {
+//       return res.status(400).json({
+//         success: false,
+//         error: true,
+//         message: "Invalid supplierId",
+//       });
+//     }
+//     const AutherData = await Worker.findById(AutherId);
+//     if (!AutherData) {
+//       return res.status(404).json({
+//         success: false,
+//         error: true,
+//         message: "Author not found",
+//       });
+//     }
+//     if (AutherData.role !== "Admin" && AutherData.role !== "Manager") {
+//       return res.status(403).json({
+//         success: false,
+//         error: true,
+//         message: "You are not authorized to update supplier",
+//       });
+//     }
+
+//     const SupplierData = await Supplier.findById(supplierId);
+//     if (!SupplierData) {
+//       return res.status(404).json({
+//         success: false,
+//         error: true,
+//         message: "Supplier not found",
+//       });
+//     }
+
+//     if (AutherData.role !== "Admin") {
+//       const BranchId = AutherData.BranchId;
+//       if (BranchId.toString() !== SupplierData.BranchId.toString()) {
+//         return res.status(403).json({
 //           success: false,
 //           error: true,
-//           message: "Branch ID not found",
+//           message: "You are not authorized to update supplier",
 //         });
 //       }
 //     }
-//     if (author.role !== "Manager" && author.role !== "Admin") {
-//       return res.status(403).json({
-//         success: false,
-//         error: true,
-//         message: "You are not authorized to create a new customer",
-//       });
-//     }
-//     if (
-//       author.role === "Admin" &&
-//       author._id.toString() !== branch.BranchStaff.toString()
-//     ) {
-//       return res.status(403).json({
-//         success: false,
-//         error: true,
-//         message: "You are not authorized to create a new customer",
-//       });
-//     }
-//     const newSupplier = new Supplier({
-//       companyName,
-//       description,
-//       phoneNumber,
-//       mobileNumbers,
-//       email,
-//       address,
-//       paymentMethod,
-//       note,
-//       supplierCreateBy: authorId,
-//       BranchId: branchId,
-//     });
-//     await newSupplier.save();
-//     const populateData = await Supplier.findById(newSupplier._id)
-//       .populate("BranchId", "branchName address , branchPhoneNumber")
-//       .populate("supplierCreateBy", "fullName phoneNumber email address");
-//     return res.status(201).json({
+
+//     const UpdateSupplier = await Supplier.findByIdAndUpdate(
+//       supplierId,
+//       {
+//         SupplierName,
+//         description,
+//         phoneNumber,
+//         mobileNumbers,
+//         companyName,
+//         email,
+//         address,
+//         paymentMethod,
+//         note,
+//       },
+//       { new: true }
+//     );
+
+//     return res.status(200).json({
 //       success: true,
-//       message: "Supplier created successfully",
-//       supplier: populateData,
+//       error: false,
+//       message: "Supplier updated successfully",
+//       Supplier: UpdateSupplier,
 //     });
-//   } catch (err) {
-//     console.error(`Error in createNewCustomer: ${err}`);
+//   } catch (error) {
+//     console.log(`error show in update supplier: ${error}`);
 //     return res.status(500).json({
 //       success: false,
 //       error: true,
-//       message: `Error in createNewCustomer: ${err.message}`,
+//       message: `error show in update supplier ${error.message}`,
 //     });
 //   }
 // };
+export const UpdateSupplier = async (req, res) => {
+  try {
+    const AuthorId = req.staffId;
+    const supplierId = req.params.supplierId;
+    const {
+      SupplierName,
+      description,
+      phoneNumber,
+      mobileNumbers,
+      companyName,
+      email,
+      address,
+      paymentMethod,
+      note,
+    } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(AuthorId)) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "Invalid Author ID",
+      });
+    }
+    if (!mongoose.Types.ObjectId.isValid(supplierId)) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "Invalid Supplier ID",
+      });
+    }
+
+    const AuthorData = await Worker.findById(AuthorId);
+    if (!AuthorData) {
+      return res.status(404).json({
+        success: false,
+        error: true,
+        message: "Author not found",
+      });
+    }
+
+    if (AuthorData.role !== "Admin" && AuthorData.role !== "Manager") {
+      return res.status(403).json({
+        success: false,
+        error: true,
+        message: "You are not authorized to update this supplier",
+      });
+    }
+
+    const SupplierData = await Supplier.findById(supplierId);
+    if (!SupplierData) {
+      return res.status(404).json({
+        success: false,
+        error: true,
+        message: "Supplier not found",
+      });
+    }
+
+    if (AuthorData.role !== "Admin") {
+      const BranchId = AuthorData.BranchId;
+      if (BranchId.toString() !== SupplierData.BranchId.toString()) {
+        return res.status(403).json({
+          success: false,
+          error: true,
+          message: "You are not authorized to update this supplier",
+        });
+      }
+    }
+
+    // Updating supplier
+    const UpdatedSupplier = await Supplier.findByIdAndUpdate(
+      supplierId,
+      {
+        SupplierName,
+        description,
+        phoneNumber,
+        mobileNumbers,
+        companyName,
+        email,
+        address,
+        paymentMethod,
+        note,
+      },
+      { new: true, runValidators: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      error: false,
+      message: "Supplier updated successfully",
+      supplier: UpdatedSupplier,
+    });
+  } catch (error) {
+    console.error(`Error in UpdateSupplier: ${error}`);
+    return res.status(500).json({
+      success: false,
+      error: true,
+      message: `An unexpected error occurred while updating the supplier: ${error.message}`,
+    });
+  }
+};

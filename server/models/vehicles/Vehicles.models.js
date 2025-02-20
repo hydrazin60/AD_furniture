@@ -22,11 +22,13 @@ const VehiclesSchema = new mongoose.Schema(
       unique: true,
       required: [true, "Vehicle number is required"],
     },
-    vehicleDriver: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Worker",
-      required: [true, "Vehicle driver is required"],
-    },
+    vehicleDriver: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Worker",
+        required: [true, "Vehicle driver is required"],
+      },
+    ],
     vehicleDescription: {
       type: String,
       default: "",

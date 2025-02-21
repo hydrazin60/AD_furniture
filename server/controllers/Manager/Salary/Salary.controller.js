@@ -81,7 +81,6 @@ export const createNewSalary = async (req, res) => {
       });
     }
 
-    const totalSalary = baseSalary + bonus + overTime - deductions;
     const newSalary = new Salary({
       staffId,
       branchId: BranchId,
@@ -129,7 +128,24 @@ export const getAllSalaryAtMonthly = async (req, res) => {
   try {
     const AutherId = req.staffId;
     const BranchId = req.params.branchId;
-    const { month, year } = req.query; // Extract month and year from query parameters
+    const { month, year } = req.query;
+
+    month = parseInt(month);
+    year = parseInt(year);
+    if (
+      !month ||
+      !year ||
+      month < 1 ||
+      month > 12 ||
+      year < 2000 ||
+      year > new Date().getFullYear()
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "Invalid month or year",
+      });
+    }
 
     // Validate AutherId
     if (!mongoose.Types.ObjectId.isValid(AutherId) || !AutherId) {

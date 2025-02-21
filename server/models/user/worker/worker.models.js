@@ -232,11 +232,13 @@ const WorkerSchema = new mongoose.Schema(
       type: String,
     },
 
-
     Attendance: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Attendance",
+        required: function () {
+          return this.role !== "Admin";
+        },
       },
     ],
     salaryDetails: [

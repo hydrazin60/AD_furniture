@@ -32,11 +32,11 @@ const SalarySchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-    paymentStatus: {
-      type: String,
-      enum: ["Pending", "Paid", "Failed"],
-      default: "Pending",
-    },
+    // paymentStatus: {
+    //   type: String,
+    //   enum: ["Pending", "Paid"],
+    //   default: "Pending",
+    // },
     paymentMethod: {
       type: String,
       enum: ["Cash", "Bank Transfer", "e-sewa"],

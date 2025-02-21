@@ -31,7 +31,7 @@ const TodoListProjectSchema = new mongoose.Schema(
     },
     todoListProjectStatus: {
       type: String,
-      enum: ["view" ,"started", "finished", "inprogress"],
+      enum: ["view" ,"started", "Completed", "inprogress"],
       default: "view",
     },
     todoListProjectStartDate: {

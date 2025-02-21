@@ -667,6 +667,23 @@ export const UpdateTodoListProjectStatus = async (req, res) => {
       .populate("BranchId", "branchName address  ")
       .populate("productId", "productName productImage");
 
+    if (!populatedData) {
+      return res.status(404).json({
+        success: false,
+        error: true,
+        message: "Todo list project not found",
+      });
+    }
+
+    if (populatedData.todoListProjectStatus === "Completed") {
+      const productData = await Product.findById(populatedData.productId);
+
+      if (productData) {
+        productData.productQuantity += populatedData.numberofProject;
+        await productData.save();
+      }
+    }
+
     return res.status(200).json({
       success: true,
       error: false,

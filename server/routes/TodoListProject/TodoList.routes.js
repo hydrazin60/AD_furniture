@@ -36,8 +36,8 @@ TodoListRouter.put(
   isAuthenticated,
   UpdateTodoListProject
 );
-TodoListRouter.post(
-  "/todolist/update_project/status/:todoListProjectId",
+TodoListRouter.put(
+  "/update/status/:todoListProjectId",
   isAuthenticated,
   UpdateTodoListProjectStatus
 );

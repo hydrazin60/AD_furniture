@@ -3,6 +3,7 @@ import Salary from "../../../models/Salary/Salary.models.js";
 import Worker from "../../../models/user/worker/worker.models.js";
 import Branch from "../../../models/Branch/Branch.model.js";
 
+
 export const createNewSalary = async (req, res) => {
   try {
     const {
@@ -81,6 +82,7 @@ export const createNewSalary = async (req, res) => {
       });
     }
 
+    const totalSalary = baseSalary + bonus + overTime - deductions;
     const newSalary = new Salary({
       staffId,
       branchId: BranchId,
@@ -128,24 +130,7 @@ export const getAllSalaryAtMonthly = async (req, res) => {
   try {
     const AutherId = req.staffId;
     const BranchId = req.params.branchId;
-    const { month, year } = req.query;
-
-    month = parseInt(month);
-    year = parseInt(year);
-    if (
-      !month ||
-      !year ||
-      month < 1 ||
-      month > 12 ||
-      year < 2000 ||
-      year > new Date().getFullYear()
-    ) {
-      return res.status(400).json({
-        success: false,
-        error: true,
-        message: "Invalid month or year",
-      });
-    }
+    const { month, year } = req.query; // Extract month and year from query parameters
 
     // Validate AutherId
     if (!mongoose.Types.ObjectId.isValid(AutherId) || !AutherId) {
@@ -251,6 +236,7 @@ export const getAllSalaryAtMonthly = async (req, res) => {
   }
 };
 
+
 export const deleteSalary = async (req, res) => {
   try {
     const AutherId = req.staffId;
@@ -346,6 +332,7 @@ export const deleteSalary = async (req, res) => {
   }
 };
 
+
 export const OneSalaryDetails = async (req, res) => {
   try {
     const salaryId = req.params.salaryId;
@@ -372,6 +359,26 @@ export const OneSalaryDetails = async (req, res) => {
         success: false,
         error: true,
         message: "Author not found",
+      });
+    }
+    const SalaryData = await Salary.findById(salaryId)
+      .populate(
+        "staffId",
+        "fullName  email phoneNumber address profilePic  role "
+      )
+      .populate(
+        "branchId",
+        "branchName branchPhoneNumber address  branchImage "
+      )
+      .populate(
+        "createdBy",
+        "fullName  email phoneNumber address profilePic  role "
+      );
+    if (!SalaryData) {
+      return res.status(404).json({
+        success: false,
+        error: true,
+        message: "Salary not found",
       });
     }
     if (
@@ -408,26 +415,7 @@ export const OneSalaryDetails = async (req, res) => {
         });
       }
     }
-    const SalaryData = await Salary.findById(salaryId)
-      .populate(
-        "staffId",
-        "fullName  email phoneNumber address profilePic  role "
-      )
-      .populate(
-        "branchId",
-        "branchName branchPhoneNumber address  branchImage "
-      )
-      .populate(
-        "createdBy",
-        "fullName  email phoneNumber address profilePic  role "
-      );
-    if (!SalaryData) {
-      return res.status(404).json({
-        success: false,
-        error: true,
-        message: "Salary not found",
-      });
-    }
+
     return res.status(200).json({
       success: true,
       error: false,
@@ -443,6 +431,7 @@ export const OneSalaryDetails = async (req, res) => {
     });
   }
 };
+
 
 // export const UpdateSalary = async (req, res) => {
 //   try {
@@ -567,6 +556,7 @@ export const OneSalaryDetails = async (req, res) => {
 //     });
 //   }
 // };
+
 
 export const UpdateSalary = async (req, res) => {
   try {

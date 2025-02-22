@@ -6,7 +6,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Contract from './pages/Contract';
 import Services from './pages/Services';
-import Login from './pages/Login';
+import Login from './features/auth/Login';
 
 function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

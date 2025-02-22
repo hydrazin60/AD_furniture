@@ -47,9 +47,9 @@ const About = () => {
             <h4 className="font-semibold text-lg mb-4">Get to Know Us</h4>
             <ul className="text-gray-600">
               <li className="mb-2"><a href="#" className="hover:underline">Careers</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">About AD</a></li>
+              <li className="mb-2"><a href="#" className="hover:underline">About Amazon</a></li>
               <li className="mb-2"><a href="#" className="hover:underline">Investor Relations</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">AD Devices</a></li>
+              <li className="mb-2"><a href="#" className="hover:underline">Amazon Devices</a></li>
             </ul>
           </div>
 
@@ -57,28 +57,28 @@ const About = () => {
           <div className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 mb-6 md:mb-0">
             <h4 className="font-semibold text-lg mb-4">Make Money with Us</h4>
             <ul className="text-gray-600">
-              <li className="mb-2"><a href="#" className="hover:underline">Sell on AD</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Sell Your Services on AD</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Sell on AD Business</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Sell Your Apps on AD</a></li>
+              <li className="mb-2"><a href="#" className="hover:underline">Sell on Amazon</a></li>
+              <li className="mb-2"><a href="#" className="hover:underline">Sell Your Services on Amazon</a></li>
+              <li className="mb-2"><a href="#" className="hover:underline">Sell on Amazon Business</a></li>
+              <li className="mb-2"><a href="#" className="hover:underline">Sell Your Apps on Amazon</a></li>
               <li className="mb-2"><a href="#" className="hover:underline">Become an Affiliate</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">AD Your Products</a></li>
+              <li className="mb-2"><a href="#" className="hover:underline">Advertise Your Products</a></li>
               <li className="mb-2"><a href="#" className="hover:underline">Self-Publish with Us</a></li>
               <li className="mb-2"><a href="#" className="hover:underline">See all</a></li> {/* Added "See all" */}
             </ul>
           </div>
 
-          {/* AD Payment Products */}
+          {/* Amazon Payment Products */}
           <div className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 mb-6 md:mb-0">
-            <h4 className="font-semibold text-lg mb-4">AD Payment Products</h4>
+            <h4 className="font-semibold text-lg mb-4">Amazon Payment Products</h4>
             <ul className="text-gray-600">
-              <li className="mb-2"><a href="#" className="hover:underline">AD Rewards Visa Signature Cards</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">AD.com Store Card</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">AD.com Corporate Credit Line</a></li>
+              <li className="mb-2"><a href="#" className="hover:underline">Amazon Rewards Visa Signature Cards</a></li>
+              <li className="mb-2"><a href="#" className="hover:underline">Amazon.com Store Card</a></li>
+              <li className="mb-2"><a href="#" className="hover:underline">Amazon.com Corporate Credit Line</a></li>
               <li className="mb-2"><a href="#" className="hover:underline">Shop with Points</a></li>
               <li className="mb-2"><a href="#" className="hover:underline">Credit Card Marketplace</a></li>
               <li className="mb-2"><a href="#" className="hover:underline">Reload Your Balance</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">AD Currency Converter</a></li>
+              <li className="mb-2"><a href="#" className="hover:underline">Amazon Currency Converter</a></li>
             </ul>
           </div>
 
@@ -86,13 +86,13 @@ const About = () => {
           <div className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 mb-6 md:mb-0">
             <h4 className="font-semibold text-lg mb-4">Let Us Help You</h4>
             <ul className="text-gray-600">
-              <li className="mb-2"><a href="#" className="hover:underline">Your AD</a></li>
+              <li className="mb-2"><a href="#" className="hover:underline">Your Account</a></li>
               <li className="mb-2"><a href="#" className="hover:underline">Your Orders</a></li>
               <li className="mb-2"><a href="#" className="hover:underline">Shipping Rates & Policies</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">AD Prime</a></li>
+              <li className="mb-2"><a href="#" className="hover:underline">Amazon Prime</a></li>
               <li className="mb-2"><a href="#" className="hover:underline">Returns & Replacements</a></li>
               <li className="mb-2"><a href="#" className="hover:underline">Manage Your Content and Devices</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">AD Assistant</a></li>
+              <li className="mb-2"><a href="#" className="hover:underline">Amazon Assistant</a></li>
               <li className="mb-2"><a href="#" className="hover:underline">Help</a></li>
             </ul>
           </div>
@@ -105,13 +105,13 @@ const About = () => {
             {/* ... (Language and Currency buttons) ... */}
           </div>
           <div className="mt-4">
-            {/* ... (AD Logo) ... */}
+            {/* ... (Amazon Logo) ... */}
           </div>
         </div>
 
       </div>
       <div className="mt-4">
-          © 1996-2024, AD.com, Inc. or its affiliates
+          © 1996-2024, Amazon.com, Inc. or its affiliates
         </div>
     </footer>
     </section>

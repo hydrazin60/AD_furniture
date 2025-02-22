@@ -22,3 +22,51 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+
+
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+
+
+
+
+ <p>
+                  <a href="#" className="btn btn-secondary me-2">Shop Now</a> {/* Added Tailwind classes and href="#" */}
+                  <a href="#" className="btn btn-white-outline">Explore</a> {/* Added Tailwind classes and href="#" */}
+                </p>
+
+
+                  {/* <div className="flex space-x-4">
+                  <button className="bg-[#2B2C2E] text-white py-3 px-6 rounded-md font-medium hover:bg-[#434446]">
+                    Shop Now
+                  </button>
+                  <button className="bg-transparent border border-[#2B2C2E] text-[#2B2C2E] py-3 px-6 rounded-md font-medium hover:bg-[#2B2C2E] hover:text-white transition-colors">
+                    Explore
+                  </button>
+                </div> */}

@@ -15,7 +15,6 @@ export const UploadRawMaterial = async (req, res) => {
     for (const key in req.body) {
       trimmedBody[key.trim()] = req.body[key];
     }
-
     const {
       productName,
       productQuantity,
@@ -27,9 +26,6 @@ export const UploadRawMaterial = async (req, res) => {
       discount = 0,
       vat = 0,
     } = trimmedBody;
-
-    console.log(AutherId);
-    console.log(BranchId);
 
     if (!AutherId) {
       return res.status(400).json({
@@ -81,15 +77,15 @@ export const UploadRawMaterial = async (req, res) => {
       });
     }
 
-    if (
-      AuthorData.role === "Admin" &&
-      AuthorData._id.toString() !== BranchData.BranchStaff.toString()
-    ) {
-      return res.status(403).json({
-        success: false,
-        error: true,
-        message: "Unauthorized to upload product for this branch",
-      });
+    if (AuthorData.role !== "Admin") {
+      if (BranchData.managerId.toString() !== AuthorData._id.toString()) {
+        return res.status(403).json({
+          success: false,
+          error: true,
+          message:
+            "You are not authorized to upload raw material for this branch",
+        });
+      }
     }
 
     // Handle product image uploads
@@ -142,6 +138,9 @@ export const UploadRawMaterial = async (req, res) => {
       .populate("BranchId", "branchName location")
       .populate("rewMaterialUploadBy", "name role phoneNumber email");
 
+    BranchData.rawMaterials.push(newRawMaterial._id);
+    await BranchData.save();
+
     return res.status(201).json({
       success: true,
       message: "Raw material uploaded successfully",
@@ -156,7 +155,7 @@ export const UploadRawMaterial = async (req, res) => {
       message: "Internal server error",
     });
   }
-};
+}; //ok
 
 export const getAllRawMaterial = async (req, res) => {
   try {

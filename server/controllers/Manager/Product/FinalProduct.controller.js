@@ -54,18 +54,14 @@ export const UploadFinalProduct = async (req, res) => {
         .status(404)
         .json({ success: false, message: "Branch not found" });
 
-    // Admin restriction (if applicable)
-    if (
-      AuthorData.role === "Admin" &&
-      AuthorData._id.toString() !== BranchData.BranchStaff.toString()
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: "Unauthorized to upload product for this branch",
-      });
+    if (AuthorData.role !== "Admin") {
+      if (AuthorData.BranchId.toString() !== BranchData._id.toString()) {
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized to upload a final product ",
+        });
+      }
     }
-
-    // Limit image upload to 5
     if (productImages.length > 5) {
       return res.status(400).json({
         success: false,
@@ -114,6 +110,9 @@ export const UploadFinalProduct = async (req, res) => {
       .populate("ProductUploadedBy", "name role email phoneNumber") // Only fetch name and role
       .populate("branchId", "branchName location") // Optimize query performance
       .exec();
+
+    BranchData.finalProducts.push(savedProduct._id);
+    await BranchData.save();
 
     return res.status(201).json({
       success: true,

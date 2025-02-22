@@ -7,10 +7,9 @@ import { getDataUri } from "../../../utils/dataUri.js";
 
 export const NewVehicleUpload = async (req, res) => {
   try {
-    const AUterid = req.staffId.trim(); // Trim the staffId
-    const BranchId = req.params.branchId.trim(); // Trim the branchId
+    const AUterid = req.staffId.trim();
+    const BranchId = req.params.branchId.trim();
 
-    // Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(AUterid)) {
       return res.status(400).json({
         success: false,
@@ -38,7 +37,6 @@ export const NewVehicleUpload = async (req, res) => {
 
     const vehicleImage = req.files;
 
-    // Check required fields
     if (!vehicleNumber || !vehicleDriver) {
       return res.status(400).json({
         success: false,
@@ -55,8 +53,7 @@ export const NewVehicleUpload = async (req, res) => {
       });
     }
 
-    // Check if the author exists
-    const Auther = await WorkerModel.findById(AUterid);
+    const Auther = await  Worker.findById(AUterid);
     if (!Auther) {
       return res.status(404).json({
         success: false,
@@ -65,7 +62,6 @@ export const NewVehicleUpload = async (req, res) => {
       });
     }
 
-    // Authorization check
     if (Auther.role !== "Manager" && Auther.role !== "Admin") {
       return res.status(403).json({
         success: false,
@@ -73,8 +69,6 @@ export const NewVehicleUpload = async (req, res) => {
         message: "You are not authorized to upload a new vehicle",
       });
     }
-
-    // Check if the branch exists
     const branchData = await BranchModel.findById(BranchId);
     if (!branchData) {
       return res.status(404).json({
@@ -84,20 +78,16 @@ export const NewVehicleUpload = async (req, res) => {
       });
     }
 
-    // Admin-specific authorization check
-    if (
-      Auther.role === "Admin" &&
-      Auther._id.toString() !== branchData.BranchStaff.toString()
-    ) {
-      return res.status(403).json({
-        success: false,
-        error: true,
-        message: "Unauthorized to create a vehicle for this branch",
-      });
+    if (Auther.role !== "Admin") {
+      if (branchData.managerId.toString() !== Auther._id.toString()) {
+        return res.status(403).json({
+          success: false,
+          error: true,
+          message: "You are not authorized to upload a new vehicle",
+        });
+      }
     }
-
-    // Validate the driver
-    const driver = await WorkerModel.findById(vehicleDriver);
+    const driver = await  Worker.findById(vehicleDriver);
     if (!driver || driver.role !== "DeliveryBoy") {
       return res.status(400).json({
         success: false,
@@ -106,7 +96,6 @@ export const NewVehicleUpload = async (req, res) => {
       });
     }
 
-    // Upload images if provided
     const imageUris = [];
     if (Array.isArray(vehicleImage) && vehicleImage.length > 0) {
       await Promise.all(
@@ -130,7 +119,6 @@ export const NewVehicleUpload = async (req, res) => {
       );
     }
 
-    // Create new vehicle entry
     const newVehicle = await Vehicles.create({
       BranchId: branchId,
       vehicleType,
@@ -142,20 +130,16 @@ export const NewVehicleUpload = async (req, res) => {
       vehicleCreatedBy: Auther._id,
     });
 
-    // Assign vehicle to the driver (only for DeliveryBoy role)
     driver.vechalId.push(newVehicle._id);
     await driver.save();
 
-    // Add the vehicle to the branch
     branchData.vehicles.push(newVehicle._id);
     await branchData.save();
 
-    // Populate data for response
     const populatedVehicle = await Vehicles.findById(newVehicle._id)
       .populate("vehicleDriver", "fullName phoneNumber email address")
       .populate("BranchId", "branchName address branchPhoneNumber")
       .populate("vehicleCreatedBy", "fullName phoneNumber email address");
-
     return res.status(201).json({
       success: true,
       message: "Vehicle uploaded successfully",
@@ -169,7 +153,7 @@ export const NewVehicleUpload = async (req, res) => {
       message: "An unexpected error occurred while uploading a new vehicle",
     });
   }
-};
+}; // ok
 
 export const GetAllVehicles = async (req, res) => {
   try {

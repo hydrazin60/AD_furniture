@@ -3,6 +3,8 @@ import SalesReceipt from "../../../models/invoice/SalesReceipt_Invoice/SalesRece
 import Product from "../../../models/product/FinalProduct/Product.models.js";
 import Worker from "../../../models/user/worker/worker.models.js";
 import mongoose from "mongoose";
+import { sendSalesReceiptInvoiceMail } from "../../../utils/mail/salesReceiptInvoices.mail.js";
+
 export const CreateSalesReceiptInvoice = async (req, res) => {
   try {
     const { staffId: AutherId } = req;
@@ -10,29 +12,55 @@ export const CreateSalesReceiptInvoice = async (req, res) => {
     const {
       CustomerName,
       Description,
-      phoneNumber,
+      CustomerphoneNumber,
       mobileNumber,
-      email,
-      address,
+      Customeremail,
+      CustomerAddress,
       Note,
       SRNumber,
       date,
+      tax = 0,
       paymentMethod,
-      ProductId,
+      products,
       MessageToCustomer,
       MessageToStatement,
-      quantity,
-      discount = 0,
     } = req.body;
 
     // Validate required fields
-    if (!AutherId || !BranchId || !CustomerName || !SRNumber) {
+    if (
+      !AutherId ||
+      !BranchId ||
+      !CustomerName ||
+      !SRNumber ||
+      !products ||
+      !Array.isArray(products) ||
+      products.length === 0
+    ) {
       return res.status(400).json({
         success: false,
         error: true,
-        message: "Missing required fields",
+        message: "Missing required fields or invalid products data",
       });
     }
+
+    // Validate each product in the array
+    for (const product of products) {
+      if (
+        !product.productId ||
+        !product.quantity ||
+        typeof product.quantity !== "number" ||
+        product.quantity <= 0 ||
+        typeof product.discount !== "number" ||
+        product.discount < 0
+      ) {
+        return res.status(400).json({
+          success: false,
+          error: true,
+          message: "Invalid product data",
+        });
+      }
+    }
+
     // Fetch author details
     const AutherData = await Worker.findById(AutherId);
     if (!AutherData)
@@ -57,18 +85,16 @@ export const CreateSalesReceiptInvoice = async (req, res) => {
         .json({ success: false, error: true, message: "Branch not found" });
 
     // Admin should not create invoices for unrelated branches
-    if (
-      AutherData.role === "Admin" &&
-      AutherData._id.toString() !== BranchData.BranchStaff.toString()
-    ) {
-      return res.status(403).json({
-        success: false,
-        error: true,
-        message: "Unauthorized to create invoice for this branch",
-      });
+    if (AutherData.role !== "Admin") {
+      if (AutherData.BranchId.toString() !== BranchData._id.toString()) {
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized to upload a final product",
+        });
+      }
     }
 
-    // Check if SRNumber already exists
+    // Check if SRNumber already exists (only SRNumber is unique)
     const existingInvoice = await SalesReceipt.findOne({ SRNumber });
     if (existingInvoice) {
       return res.status(400).json({
@@ -77,18 +103,32 @@ export const CreateSalesReceiptInvoice = async (req, res) => {
         message: "SR Number already exists",
       });
     }
-    const product = await Product.findById(ProductId);
-    if (!product) {
-      return res.status(404).json({
-        success: false,
-        error: true,
-        message: "Product not found",
-      });
-    }
 
-    const finalPrice = quantity * product.productPrice - discount;
+    let subtotal = 0;
+    const validatedProducts = await Promise.all(
+      products.map(async (product) => {
+        const productData = await Product.findById(product.productId);
+        if (!productData) {
+          throw new Error(`Product with ID ${product.productId} not found`);
+        }
 
-    // Create and save the invoice
+        const totalPrice =
+          product.quantity * productData.productPrice - product.discount;
+        subtotal += totalPrice;
+
+        return {
+          productId: product.productId,
+          quantity: product.quantity,
+          unitPrice: productData.productPrice,
+          discount: product.discount,
+          totalPrice: totalPrice,
+        };
+      })
+    );
+
+    const totalTax = (subtotal * tax) / 100;
+    const grandTotal = subtotal + totalTax;
+
     const SalesReceiptInvoice = new SalesReceipt({
       BranchId: BranchId,
       salesReceiptCreatedBy: AutherId,
@@ -96,34 +136,56 @@ export const CreateSalesReceiptInvoice = async (req, res) => {
       SRNumber,
       date,
       paymentMethod,
-      ProductId,
-      totalAmount: finalPrice,
-      unitPrice: product.productPrice,
+      products: validatedProducts,
+      grandTotal,
+      Note,
+      tax,
+      Description,
+      CustomerphoneNumber: CustomerphoneNumber || null,
+      mobileNumber: mobileNumber || BranchData.branchPhoneNumber,
+      Customeremail: Customeremail || null,
+      CustomerAddress,
       MessageToCustomer,
       MessageToStatement,
-      quantity,
-      discount,
-      Note,
-      Description,
-      phoneNumber,
-      mobileNumber,
-      email,
-      address,
     });
 
     const result = await SalesReceiptInvoice.save();
 
-    // Populate response data
     const populateData = await SalesReceipt.findById(result._id)
+      .populate("salesReceiptCreatedBy", "fullName email phoneNumber role")
       .populate(
-        "salesReceiptCreatedBy",
-        "  fullName  email  phoneNumber role  "
+        "products.productId",
+        "productName productPrice productCategory productQuantity"
       )
-      .populate(
-        "ProductId",
-        "productName productPrice productCategory  productQuantity "
-      )
-      .populate("BranchId", "branchName address");
+      .populate("BranchId", "branchName address phoneNumber");
+
+    // Update branch with the new sales receipt invoice
+    BranchData.SalesReceiptInvoices.push(result._id);
+    await BranchData.save();
+
+    // Send email
+    await sendSalesReceiptInvoiceMail(
+      Customeremail,
+      CustomerName,
+      AutherData.email,
+      AutherData.fullName,
+      SRNumber,
+      date,
+      paymentMethod,
+      validatedProducts.map((product) => ({
+        productName: product.productId.productName,
+        quantity: product.quantity,
+        unitPrice: product.unitPrice,
+        discount: product.discount || 0,
+        totalPrice: product.totalPrice,
+      })),
+      subtotal,
+      tax,
+      grandTotal,
+      BranchData.branchName,
+      BranchData.branchPhoneNumber,
+      BranchData.address
+    );
 
     return res.status(201).json({
       success: true,
@@ -132,6 +194,7 @@ export const CreateSalesReceiptInvoice = async (req, res) => {
     });
   } catch (error) {
     console.error(`Error in CreateSalesReceiptInvoice: ${error.message}`);
+    console.error(error.stack); // Log the stack trace
     return res.status(500).json({
       success: false,
       error: true,
@@ -276,6 +339,7 @@ export const UpdateSalesReceiptInvoice = async (req, res) => {
     });
   }
 };
+
 // only Admin
 export const getAllSalesReceiptInvoice = async (req, res) => {
   try {

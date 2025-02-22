@@ -14,6 +14,7 @@ import SalaryRouter from "./routes/Salary/Salary.routes.js";
 import AttendanceRouter from "./routes/Attendance/Attendance.routes.js";
 import TodoListRouter from "./routes/TodoListProject/TodoList.routes.js";
 import StaffRouter from "./routes/Staff/Staff.routes.js";
+import adminAuthRouter from "./routes/Auth/Admin/Admin.Auth.routes.js";
 
 dotenv.config();
 const app = express();
@@ -32,6 +33,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use("/api/v1/ad_furniture/admin/auth", adminAuthRouter);
 app.use("/api/v1/ad_furniture/staff/auth", staffAuthRouter);
 app.use("/api/v1/ad_furniture/branch", BranchRouter);
 app.use("/api/v1/ad_furniture/invoices", invoiceRouter);

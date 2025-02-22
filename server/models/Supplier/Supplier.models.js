@@ -22,6 +22,13 @@ const SupplierSchema = new mongoose.Schema(
         ref: "Worker",
       },
     ],
+    SupplierCategory: [
+      {
+        type: String,
+        enum: ["RawMaterial", "FinalProduct"],
+        default: "RawMaterial",
+      },
+    ],
     description: {
       type: String,
       default: "",
@@ -72,10 +79,6 @@ const SupplierSchema = new mongoose.Schema(
         type: String,
         default: "",
       },
-    },
-    tax: {
-      type: Number,
-      default: 0,
     },
     paymentMethod: {
       type: String,

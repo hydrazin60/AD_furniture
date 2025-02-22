@@ -6,11 +6,15 @@ import Branch from "../../models/Branch/Branch.model.js";
 
 export const createNewBranch = async (req, res) => {
   try {
-    const { branchName, branchPassword, address } = req.body;
+    const staffId = req.staffId;
+    const {
+      branchName,
+      branchPassword,
+      address,
+      branchPhoneNumber,
+      description,
+    } = req.body;
     const branchImages = req.files;
-
-    // Validate required fields
-    // 
     if (!branchName || !branchPassword || !address) {
       return res.status(400).json({
         success: false,
@@ -18,8 +22,6 @@ export const createNewBranch = async (req, res) => {
         message: "Branch name, password, and address are required",
       });
     }
-
-    // Check if branch already exists
     const existingBranch = await Branch.findOne({ branchName });
     if (existingBranch) {
       return res.status(400).json({
@@ -28,9 +30,6 @@ export const createNewBranch = async (req, res) => {
         message: "Branch already exists",
       });
     }
-
-    // Verify admin permissions
-    const staffId = req.staffId;
     const staffData = await Worker.findById(staffId);
     if (!staffData || staffData.role !== "Admin") {
       return res.status(403).json({
@@ -39,8 +38,6 @@ export const createNewBranch = async (req, res) => {
         message: "Only admin can create a new branch",
       });
     }
-
-    // Handle branch images
     const imageUris = [];
     if (Array.isArray(branchImages) && branchImages.length > 0) {
       await Promise.all(
@@ -64,7 +61,6 @@ export const createNewBranch = async (req, res) => {
       );
     }
 
-    // Ensure at least one image is uploaded
     if (imageUris.length === 0) {
       return res.status(400).json({
         success: false,
@@ -72,26 +68,24 @@ export const createNewBranch = async (req, res) => {
         message: "At least one branch image is required",
       });
     }
-    // Hash the branch password
     const hashedPassword = await bcrypt.hash(branchPassword, 10);
     // Create new branch
     const newBranch = new Branch({
       branchName,
       branchPassword: hashedPassword,
+      branchPhoneNumber,
+      description,
       address,
       branchImage: imageUris,
-      branchCreateBy: staffData._id, // Correct field name
+      branchCreateBy: staffData._id,
     });
 
-    // Save the branch to the database
     const savedBranch = await newBranch.save();
-    // Remove sensitive data before sending the response
     const branchData = savedBranch.toObject();
     delete branchData.branchPassword;
-    // Populate the branchCreateBy field with admin details
     const populatedBranch = await Branch.findById(branchData._id).populate(
-      "branchCreateBy", // Correct field name
-      "-password" // Exclude password field
+      "branchCreateBy",
+      "fullName , email  phoneNumber role"
     );
 
     return res.status(201).json({

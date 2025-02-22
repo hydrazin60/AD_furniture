@@ -7,33 +7,60 @@ const ExpenseInvoiceSchema = new mongoose.Schema(
       ref: "Branch",
       required: true,
     },
-    expenseInvoiceCreatedBy: [
+    expenseInvoiceCreatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Worker",
+      required: true,
+    },
+    expenseItems: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Worker",
+        itemName: { type: String, required: true },
+        itemDescription: { type: String, default: "" },
+        unitPrice: { type: Number, required: true },
+        quantity: { type: Number, required: true, min: 1 },
+        totalItemPrice: { type: Number, required: true },
       },
     ],
-    Price: {
-      type: Number,
-      required: [true, "Price is required"],
-    },
+
     PaymentMethod: {
       type: String,
       enum: ["Cash", "Bank Transfer", "e-sewa"],
       default: "Cash",
     },
-    PaidName: {
+
+    payerName: {
       type: String,
-      required: [true, "Paid name is required"],
+      required: [true, "Payer name is required"],
     },
+    recipientName: {
+      type: String,
+      default: "",
+    },
+    payerEmail: {
+      type: String,
+      default: "",
+    },
+    recipientEmail: {
+      type: String,
+      default: "",
+    },
+
     typeOfExpense: {
       type: String,
       enum: ["Marketing", "Maintenance", "SCO", "Transport", "Other"],
       required: [true, "Type of expense is required"],
     },
+    totalPrice: {
+      type: Number,
+      required: [true, "Total price is required"],
+    },
     tax: {
       type: Number,
-      default: 13,
+      default: 0,
+    },
+    grandTotal: {
+      type: Number,
+      required: true,
     },
     description: {
       type: String,

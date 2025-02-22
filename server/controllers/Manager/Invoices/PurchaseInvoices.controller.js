@@ -2,10 +2,19 @@ import mongoose from "mongoose";
 import Branch from "../../../models/Branch/Branch.model.js";
 import PurchaseInvoice from "../../../models/invoice/Purchase_Invoice/purchaseInvoice.models.js";
 import Worker from "../../../models/user/worker/worker.models.js";
+import Supplier from "../../../models/Supplier/Supplier.models.js";
 
 export const CreatePurchaseInvoice = async (req, res) => {
   try {
-    const { invoiceNumber, invoiceDate, products, Notes } = req.body;
+    // ownInvoiceNumber is the invoice number of the invoice that is being created(Ad_funiture company creates this invoice)
+    const {
+      invoiceNumber,
+      invoiceDate,
+      products,
+      Notes,
+      ownInvoiceNumber,
+      supplierId,
+    } = req.body;
     const AutherId = req.staffId;
     const branchId = req.params.branchId;
     if (
@@ -18,11 +27,36 @@ export const CreatePurchaseInvoice = async (req, res) => {
         success: false,
         error: true,
         message:
-          "Invoice Number and products are required and products must be a non-empty array",
+          "Invoice Number and products are required, and products must be a non-empty array",
       });
     }
 
-    // Fetch authenticated user
+    if (!ownInvoiceNumber) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "ownInvoiceNumber is required",
+      });
+    }
+    if (!mongoose.Types.ObjectId.isValid(supplierId)) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "Supplier ID is required",
+      });
+    }
+
+    const existingInovice = await PurchaseInvoice.findOne({
+      ownInvoiceNumber: ownInvoiceNumber,
+    });
+    if (existingInovice) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "Invoice Number already exists",
+      });
+    }
+
     const Auther = await Worker.findById(AutherId);
     if (!Auther) {
       return res.status(404).json({
@@ -32,7 +66,6 @@ export const CreatePurchaseInvoice = async (req, res) => {
       });
     }
 
-    // Check user role (Only Manager & Admin can proceed)
     if (Auther.role !== "Manager" && Auther.role !== "Admin") {
       return res.status(403).json({
         success: false,
@@ -40,8 +73,6 @@ export const CreatePurchaseInvoice = async (req, res) => {
         message: "Only Managers and Admins can create an invoice",
       });
     }
-
-    // Fetch Branch details
     const BranchData = await Branch.findById(branchId);
     if (!BranchData) {
       return res.status(404).json({
@@ -50,34 +81,72 @@ export const CreatePurchaseInvoice = async (req, res) => {
         message: "Branch not found",
       });
     }
-
-    // Authorization check: Managers can only access their own branch
-    if (
-      Auther.role !== "Admin" &&
-      Auther._id.toString() !== BranchData.BranchStaff.toString()
-    ) {
-      return res.status(403).json({
-        success: false,
-        error: true,
-        message: "You are not authorized to create an invoice for this branch",
-      });
+    if (Auther.role !== "Admin") {
+      if (Auther._id.toString() !== BranchData.BranchStaff.toString()) {
+        return res.status(403).json({
+          success: false,
+          error: true,
+          message:
+            "You are not authorized to create an invoice for this branch",
+        });
+      }
     }
 
-    // Create and save invoice
+    let subtotal = 0;
+    const validatedProducts = products.map((product) => {
+      const totalAmount = product.quantity * product.unitPrice;
+      const discountedAmount = totalAmount - (product.discount || 0);
+      const taxAmount = (discountedAmount * (product.tax || 0)) / 100;
+      const finalProductPrice = discountedAmount + taxAmount;
+      subtotal += finalProductPrice;
+
+      return {
+        productName: product.productName,
+        quantity: product.quantity,
+        unitPrice: product.unitPrice,
+        totalAmount: totalAmount,
+        tax: product.tax || 0,
+        discount: product.discount || 0,
+        finalProductPrice: finalProductPrice,
+      };
+    });
+
+    const finalPrice = subtotal;
     const newInvoice = new PurchaseInvoice({
+      ownInvoiceNumber,
       BranchId: branchId,
       purchaseInvoiceCreatedBy: AutherId,
       invoiceNumber,
+      finalPrice,
       invoiceDate,
-      products,
+      products: validatedProducts,
       Notes,
+      supplierId,
     });
 
     const savedInvoice = await newInvoice.save();
-
     const populatedInvoice = await PurchaseInvoice.findById(savedInvoice._id)
-      .populate("BranchId")
-      .populate("purchaseInvoiceCreatedBy");
+      .populate("BranchId", " branchName branchPhoneNumber address")
+      .populate(
+        "purchaseInvoiceCreatedBy",
+        " fullName phoneNumber email address"
+      );
+
+    BranchData.PurchaseInvoices.push(savedInvoice._id);
+    await BranchData.save();
+
+    if (supplierId) {
+      const SupplierData = await Supplier.findById(supplierId);
+      if (!SupplierData) {
+        return res.status(404).json({
+          success: false,
+          error: true,
+          message: "Supplier not found",
+        });
+      }
+      SupplierData.totalPurchaseInvoice.push(savedInvoice._id);
+      await SupplierData.save();
+    }
 
     return res.status(201).json({
       success: true,
@@ -94,7 +163,6 @@ export const CreatePurchaseInvoice = async (req, res) => {
     });
   }
 };
-
 export const UpdatePurchaseInvoice = async (req, res) => {
   try {
     const AutherId = req.staffId;

@@ -16,6 +16,7 @@ export const createNewSupplier = async (req, res) => {
       address,
       paymentMethod,
       note,
+      SupplierCategory,
     } = req.body;
     // Validate required fields
     if (!SupplierName || !phoneNumber || !email) {
@@ -53,7 +54,7 @@ export const createNewSupplier = async (req, res) => {
         message: "You are not authorized to create a new supplier",
       });
     }
-    // Create the new supplier
+
     const newSupplier = new Supplier({
       SupplierName,
       companyName,
@@ -64,6 +65,7 @@ export const createNewSupplier = async (req, res) => {
       address,
       paymentMethod,
       note,
+      SupplierCategory,
       supplierCreateBy: authorId,
       BranchId: branchId,
     });
@@ -72,6 +74,10 @@ export const createNewSupplier = async (req, res) => {
     const populateData = await Supplier.findById(newSupplier._id)
       .populate("BranchId", "branchName address branchPhoneNumber")
       .populate("supplierCreateBy", "fullName phoneNumber email address");
+
+   branch.SupplierId.push(newSupplier._id);
+    await branch.save();
+
     return res.status(201).json({
       success: true,
       message: "Supplier created successfully",
@@ -85,7 +91,7 @@ export const createNewSupplier = async (req, res) => {
       message: `Error in createNewSupplier: ${err.message}`,
     });
   }
-};
+}; // ok
 
 export const getAllSuppliers = async (req, res) => {
   try {
@@ -355,6 +361,7 @@ export const DeleteSupplier = async (req, res) => {
 //     });
 //   }
 // };
+
 export const UpdateSupplier = async (req, res) => {
   try {
     const AuthorId = req.staffId;

@@ -6,9 +6,15 @@ const BranchSchema = new mongoose.Schema(
       required: [true, "Branch name is required"],
       unique: true,
     },
-    branchPhoneNumber: {
+    branchPhoneNumber: [
+      {
+        type: String,
+        unique: true,
+      },
+    ],
+    description: {
       type: String,
-      unique: true,
+      default: "Welcome to our branch",
     },
     branchPassword: {
       type: String,
@@ -44,10 +50,6 @@ const BranchSchema = new mongoose.Schema(
         ref: "Worker",
       },
     ],
-    numberOfWorkers: {
-      type: Number,
-      default: 0,
-    },
     branchImage: [
       {
         public_id: {
@@ -60,12 +62,19 @@ const BranchSchema = new mongoose.Schema(
         },
       },
     ],
+    SupplierId: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Supplier",
+      },
+    ],
     finalProducts: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Product",
       },
     ],
+
     rawMaterials: [
       {
         type: mongoose.Schema.Types.ObjectId,

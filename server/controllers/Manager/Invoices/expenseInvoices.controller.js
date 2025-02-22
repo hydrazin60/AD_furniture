@@ -2,22 +2,37 @@ import ExpenseInvoice from "../../../models/invoice/expense_Invoice/expense.mode
 import Worker from "../../../models/user/worker/worker.models.js";
 import Branch from "../../../models/Branch/Branch.model.js";
 import mongoose from "mongoose";
+import { sendExpenseInvoiceMail } from "../../../utils/mail/expenseInvoices.mail.js";
 
 export const CreateExpenseInvoice = async (req, res) => {
   try {
     const AutherId = req.staffId;
     const branchId = req.params.branchId;
     const {
-      Price,
+      payerEmail,
+      recipientName,
+      recipientEmail,
       PaymentMethod,
-      PaidName,
+      payerName,
       typeOfExpense,
-      tax,
+      tax = 0,
       description,
       RefNumber,
       messageOnStatement,
+      expenseItems,
     } = req.body;
 
+    if (
+      !expenseItems ||
+      !Array.isArray(expenseItems) ||
+      expenseItems.length === 0
+    ) {
+      return res.status(400).json({
+        success: false,
+        error: true,
+        message: "At least one expense item is required",
+      });
+    }
     const Auther = await Worker.findById(AutherId);
     if (!Auther) {
       return res.status(404).json({
@@ -55,31 +70,72 @@ export const CreateExpenseInvoice = async (req, res) => {
       });
     }
 
-    if (!Price || !PaidName || !typeOfExpense) {
+    if (!recipientName || !recipientEmail || !typeOfExpense) {
       return res.status(400).json({
         success: false,
         error: true,
-        message: "Price, Paid name and type of expense are required",
+        message: "recipientName, recipientEmail and typeOfExpense are required",
       });
     }
 
+    let totalPrice = 0;
+    const formattedItems = expenseItems.map((item) => {
+      const itemTotal = item.unitPrice * item.quantity;
+      totalPrice += itemTotal;
+      return {
+        itemName: item.itemName,
+        itemDescription: item.itemDescription,
+        unitPrice: item.unitPrice,
+        quantity: item.quantity,
+        totalItemPrice: itemTotal,
+      };
+    });
+
+    const grandTotal = totalPrice + (totalPrice * tax) / 100;
+
     const expenseInvoices = await ExpenseInvoice.create({
-      BranchId: branchId,
-      expenseInvoiceCreatedBy: AutherId,
-      Price,
       PaymentMethod,
-      PaidName,
+      payerName,
+      recipientName,
+      payerEmail,
+      recipientEmail,
       typeOfExpense,
+      totalPrice,
       tax,
+      grandTotal,
       description,
       RefNumber,
       messageOnStatement,
+      expenseItems: formattedItems,
+      expenseInvoiceCreatedBy: AutherId,
+      BranchId: branchId,
     });
 
     const populateData = await ExpenseInvoice.findById(expenseInvoices._id)
-      .populate("BranchId")
-      .populate("expenseInvoiceCreatedBy");
+      .populate("BranchId", "branchName branchPhoneNumber address")
+      .populate("expenseInvoiceCreatedBy", "fullName email role");
 
+    BranchData.expenseInvoices.push(expenseInvoices._id);
+
+    await BranchData.save();
+
+    await sendExpenseInvoiceMail(
+      payerEmail,
+      payerName,
+      recipientEmail,
+      recipientName,
+      typeOfExpense,
+      totalPrice,
+      tax,
+      grandTotal,
+      PaymentMethod,
+      RefNumber,
+      description, // Ensure this is an array of objects
+      new Date().toISOString(), // Use current date as payment date
+      BranchData.branchName,
+      BranchData.branchPhoneNumber,
+      BranchData.address // Ensure this is an object with country, province, district, street
+    );
     res.status(201).json({
       success: true,
       error: false,
@@ -87,11 +143,11 @@ export const CreateExpenseInvoice = async (req, res) => {
       data: populateData,
     });
   } catch (error) {
-    console.log(`error in isAuthenticated middleware: ${error}`);
+    console.log(`error show on create expense invoice: ${error}`);
     res.status(500).json({
       success: false,
       error: true,
-      message: `Error in isAuthenticated middleware: ${error}`,
+      message: `Error creating expense invoice: ${error}`,
     });
   }
 };
@@ -436,4 +492,3 @@ export const deleteExpenseInvoice = async (req, res) => {
     });
   }
 };
-

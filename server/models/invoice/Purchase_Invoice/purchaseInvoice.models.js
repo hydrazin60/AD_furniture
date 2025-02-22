@@ -11,6 +11,11 @@ const PurchaseInvoiceSchema = new mongoose.Schema(
         ref: "Worker",
       },
     ],
+    ownInvoiceNumber: {
+      type:  String,
+      required: [true, "Branch invoice number is required"],
+      unique: true,
+    },
     BranchId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Branch",
@@ -20,6 +25,11 @@ const PurchaseInvoiceSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+
+    finalPrice: {
+      type: Number,
+      required: true,
+    },
     invoiceDate: {
       type: Date,
       default: Date.now,
@@ -27,9 +37,9 @@ const PurchaseInvoiceSchema = new mongoose.Schema(
     },
     products: [
       {
-        productId: {
+        productName: {
           type: String,
-          required: [true, "Product id is required"],
+          required: [true, "Product name is required"],
         },
         quantity: {
           type: Number,
@@ -42,6 +52,14 @@ const PurchaseInvoiceSchema = new mongoose.Schema(
         totalAmount: {
           type: Number,
           required: [true, "Total amount is required"],
+        },
+        tax: {
+          type: Number,
+          default: 0,
+        },
+        discount: {
+          type: Number,
+          default: 0,
         },
       },
     ],

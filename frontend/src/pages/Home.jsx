@@ -529,7 +529,7 @@ const Home = () => {
           <div className="mb-4">
             <h3 className="text-lg font-semibold">About Us</h3>
             <p className="text-white-400">
-              AD Furniture - Crafting quality furniture with elegance and style.
+              AD Furniture - Crafting Quality Furniture with elegance and style.
             </p>
           </div>
           <div className="mb-4">

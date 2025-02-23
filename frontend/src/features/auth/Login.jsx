@@ -9,142 +9,150 @@ const Login = () => {
     console.log('Email submitted:', email);
   };
 
+  const handleGoogleLogin = () => {
+    // Handle Google login logic here (e.g., using Firebase, Auth0, etc.)
+    console.log('Google login initiated');
+    // Example: window.location.href = '/auth/google'; // Replace with your Google login endpoint
+  };
+
   return (
-    <div className="bg-white min-h-screen flex flex-col justify-center items-center">
-      <div className="w-full max-w-md"> {/* Adjust max-w as needed */}
-        <div className="text-center mb-8">
-          <img 
-            src="/images/Ad.png" // Replace with your logo URL
-            alt="AD Logo" 
-            className="mx-auto h-10"  // Adjust height as needed
-          />
-        </div>
-        <div className="border border-gray-300 rounded-lg p-8">
-          <h2 className="text-2xl font-medium mb-4">Sign in</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="mb-4">
-              <label htmlFor="email" className="block text-gray-700 font-medium mb-2">
-                Email or mobile phone number
-              </label>
-              <input
-                type="text"
-                id="email"
-                className="w-full border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500" // Yellow focus ring
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email or mobile phone number"
-              />
+    <div className="bg-gray-50 min-h-screen flex flex-col">
+      <div className="flex-grow flex flex-col justify-center items-center">
+        <div className="w-full max-w-md px-4">
+          <div className="text-center mb-8">
+            <img
+              src="/images/Ad.png" // Replace with your logo URL
+              alt="AD Logo"
+              className="mx-auto h-10"
+            />
+          </div>
+          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-md">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">Sign in</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                  Email or mobile phone number
+                </label>
+                <input
+                  type="text"
+                  id="email"
+                  className="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email or mobile phone number"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-200"
+              >
+                Continue
+              </button>
+              <div className="mt-4 text-xs text-gray-600">
+                By continuing, you agree to Amazon's{' '}
+                <a href="#" className="text-blue-500 hover:underline">
+                  Conditions of Use
+                </a>{' '}
+                and{' '}
+                <a href="#" className="text-blue-500 hover:underline">
+                  Privacy Notice
+                </a>
+                .
+              </div>
+              <div className="mt-4 text-xs text-gray-600">
+                <span className="text-gray-400 mr-1">•</span>{' '}
+                <a href="#" className="text-blue-500 hover:underline">
+                  Need help?
+                </a>
+              </div>
+            </form>
+
+            <div className="mt-6 pt-6 border-t border-gray-200 text-center text-xs text-gray-600">
+              Buying for work?{' '}
+              <a href="#" className="text-blue-500 hover:underline">
+                Shop on Amazon Business
+              </a>
+            </div>
+          </div>
+
+          <div className="mt-4 text-center">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white px-2 text-gray-500">Or</span>
+              </div>
             </div>
             <button
-              type="submit"
-              className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-medium py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-200" // Yellow button
+              onClick={handleGoogleLogin}
+              className="mt-4 w-full border border-gray-300 rounded-md py-2 px-4 flex items-center justify-center space-x-2"
             >
-              Continue
+              <img
+                src="https://www.svgrepo.com/show/475656/google-color.svg" // Replace with your Google logo URL
+                alt="Google Logo"
+                className="h-5 w-5"
+              />
+              <span className="text-sm font-medium text-gray-700">Continue with Google</span>
             </button>
-            <div className="mt-4 text-sm text-gray-600">
-              By continuing, you agree to Amazon's <a href="#" className="text-blue-500">Conditions of Use</a> and <a href="#" className="text-blue-500">Privacy Notice</a>.
+          </div>
+
+          <div className="mt-6 text-center text-gray-600 text-sm">
+            New to Amazon?{' '}
+            <a href="#" className="text-blue-500 font-medium hover:underline">
+              Create your Amazon account
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <footer className="bg-gray-100 py-12 mt-16">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="mb-6 md:mb-0">
+              <h4 className="font-semibold text-lg mb-4 text-gray-800">Company</h4>
+              <ul className="text-gray-600">
+                <li className="mb-2"><a href="#" className="hover:underline">About Us</a></li>
+                <li className="mb-2"><a href="#" className="hover:underline">Our Mission</a></li>
+                <li className="mb-2"><a href="#" className="hover:underline">Contact Us</a></li>
+              </ul>
             </div>
-            <div className="mt-6 text-gray-600">
-              <span className="text-gray-400 mr-1">•</span> <a href="#" className="text-blue-500">Need help?</a>
+
+            <div className="mb-6 md:mb-0">
+              <h4 className="font-semibold text-lg mb-4 text-gray-800">Services</h4>
+              <ul className="text-gray-600">
+                <li className="mb-2"><a href="#" className="hover:underline">Global Sourcing</a></li>
+                <li className="mb-2"><a href="#" className="hover:underline">Logistics & Customs</a></li>
+                <li className="mb-2"><a href="#" className="hover:underline">Consultation</a></li>
+              </ul>
             </div>
-          </form>
 
-          <div className="mt-8 pt-8 border-t border-gray-300 text-center text-sm text-gray-600">
-            Buying for work? <a href="#" className="text-blue-500">Shop on Amazon Business</a>
+            <div className="mb-6 md:mb-0">
+              <h4 className="font-semibold text-lg mb-4 text-gray-800">Support</h4>
+              <ul className="text-gray-600">
+                <li className="mb-2"><a href="#" className="hover:underline">FAQ</a></li>
+                <li className="mb-2"><a href="#" className="hover:underline">Shipping & Delivery</a></li>
+                <li className="mb-2"><a href="#" className="hover:underline">Returns</a></li>
+              </ul>
+            </div>
+
+            <div className="mb-6 md:mb-0">
+              <h4 className="font-semibold text-lg mb-4 text-gray-800">Connect</h4>
+              <ul className="text-gray-600">
+                <li className="mb-2"><a href="#" className="hover:underline">Facebook</a></li>
+                <li className="mb-2"><a href="#" className="hover:underline">Instagram</a></li>
+                <li className="mb-2"><a href="#" className="hover:underline">LinkedIn</a></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="border-t border-gray-300 pt-8 mt-12 text-center">
+            <p className="text-sm text-gray-600">
+              © {new Date().getFullYear()} AD Furniture Import. All rights reserved.
+            </p>
           </div>
         </div>
-        <div className="mt-6 text-center text-gray-600">
-          New to Amazon? <a href="#" className="text-blue-500 font-medium">Create your Amazon account</a>
-        </div>
-      </div>
-
-      {/* Footer */}
-      <footer className="bg-gray-100 py-8">
-      <div className="container mx-auto px-4">
-        <div className="flex flex-wrap justify-around">
-
-          {/* Get to Know Us */}
-          <div className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 mb-6 md:mb-0">
-            <h4 className="font-semibold text-lg mb-4">Get to Know Us</h4>
-            <ul className="text-gray-600">
-              <li className="mb-2"><a href="#" className="hover:underline">Careers</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">About Amazon</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Investor Relations</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Amazon Devices</a></li>
-            </ul>
-          </div>
-
-          {/* Make Money with Us */}
-          <div className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 mb-6 md:mb-0">
-            <h4 className="font-semibold text-lg mb-4">Make Money with Us</h4>
-            <ul className="text-gray-600">
-              <li className="mb-2"><a href="#" className="hover:underline">Sell on Amazon</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Sell Your Services on Amazon</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Sell on Amazon Business</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Sell Your Apps on Amazon</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Become an Affiliate</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Advertise Your Products</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Self-Publish with Us</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">See all</a></li> {/* Added "See all" */}
-            </ul>
-          </div>
-
-          {/* Amazon Payment Products */}
-          <div className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 mb-6 md:mb-0">
-            <h4 className="font-semibold text-lg mb-4">Amazon Payment Products</h4>
-            <ul className="text-gray-600">
-              <li className="mb-2"><a href="#" className="hover:underline">Amazon Rewards Visa Signature Cards</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Amazon.com Store Card</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Amazon.com Corporate Credit Line</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Shop with Points</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Credit Card Marketplace</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Reload Your Balance</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Amazon Currency Converter</a></li>
-            </ul>
-          </div>
-
-          {/* Let Us Help You */}
-          <div className="w-full sm:w-1/2 md:w-1/4 lg:w-1/5 mb-6 md:mb-0">
-            <h4 className="font-semibold text-lg mb-4">Let Us Help You</h4>
-            <ul className="text-gray-600">
-              <li className="mb-2"><a href="#" className="hover:underline">Your Account</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Your Orders</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Shipping Rates & Policies</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Amazon Prime</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Returns & Replacements</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Manage Your Content and Devices</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Amazon Assistant</a></li>
-              <li className="mb-2"><a href="#" className="hover:underline">Help</a></li>
-            </ul>
-          </div>
-
-        </div>
-
-        {/* Bottom Section (Language, Currency, Logo) - No changes needed here */}
-        <div className="border-t border-gray-300 pt-6 mt-8 text-center">
-          <div className="flex justify-center items-center">
-            {/* ... (Language and Currency buttons) ... */}
-          </div>
-          <div className="mt-4">
-            {/* ... (Amazon Logo) ... */}
-          </div>
-        </div>
-
-      </div>
-    </footer>
-      <div className="mt-12 w-full max-w-md text-center text-sm text-gray-600">
-        <hr className="my-4 border-gray-300" /> {/* Added horizontal line */}
-        <div className="flex justify-center space-x-6"> {/* Use space-x-6 for spacing */}
-          <a href="#" className="text-gray-600">Conditions of Use</a>
-          <a href="#" className="text-gray-600">Privacy Notice</a>
-          <a href="#" className="text-gray-600">Help</a>
-        </div>
-        
-        <div className="mt-4">
-          © 1996-2024, Amazon.com, Inc. or its affiliates
-        </div>
-      </div>
-      
+      </footer>
     </div>
   );
 };

@@ -55,14 +55,15 @@ function App() {
                   About
                 </Link>
               </li>
-              <li>
-                <Link to="/contract" className="text-white hover:bg-black hover:text-white p-2 rounded">
-                  Contract
-                </Link>
-              </li>
+             
               <li>
                 <Link to="/services" className="text-white hover:bg-black hover:text-white p-2 rounded">
                   Services
+                </Link>
+              </li>
+              <li>
+                <Link to="/contract" className="text-white hover:bg-black hover:text-white p-2 rounded">
+                  Contract
                 </Link>
               </li>
               <li>
@@ -85,14 +86,15 @@ function App() {
                     About
                   </Link>
                 </li>
-                <li>
-                  <Link to="/contract" className="text-white hover:bg-black hover:text-white p-2 rounded" onClick={toggleMobileMenu}>
-                    Contract
-                  </Link>
-                </li>
+                
                 <li>
                   <Link to="/services" className="text-white hover:bg-black hover:text-white p-2 rounded" onClick={toggleMobileMenu}>
                     Services
+                  </Link>
+                </li>
+                <li>
+                  <Link to="/contract" className="text-white hover:bg-black hover:text-white p-2 rounded" onClick={toggleMobileMenu}>
+                    Contract
                   </Link>
                 </li>
                 <li>
@@ -109,8 +111,8 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
-            <Route path="/contract" element={<Contract />} />
             <Route path="/services" element={<Services />} />
+            <Route path="/contract" element={<Contract />} />
             <Route path="/login" element={<Login />} />
           </Routes>
         </div>

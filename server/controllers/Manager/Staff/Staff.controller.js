@@ -158,9 +158,9 @@ export const GetAllStaffOnBranch = async (req, res) => {
         message: "You are not authorized to get this staff data",
       });
     }
-    const staffdata = await Worker.find({ BranchId: branchId }).populate(
-      "BranchId"
-    );
+    const staffdata = await Worker.find({ BranchId: branchId })
+      .populate("BranchId", "branchName address branchImage branchPhoneNumber")
+      .populate("createdBy", "fullName email");
     return res.status(200).json({
       success: true,
       message: "Staff data fetched successfully",
@@ -179,37 +179,28 @@ export const GetAllStaffOnBranch = async (req, res) => {
 export const UpdateStaffData = async (req, res) => {
   try {
     const AutherId = req.staffId;
+    const staffId = req.params.staffId;
     const { fullName, email, phoneNumber, address } = req.body;
-    const uploadProfilePic = async (file) => {
-      try {
-        const fileBase64 = `data:${file.mimetype};base64,${file.buffer.toString(
-          "base64"
-        )}`;
-        const cloudResponse = await cloudinary.uploader.upload(fileBase64, {
-          folder: "profilePic",
-        });
-        return cloudResponse.secure_url;
-      } catch (uploadErr) {
-        console.error("Cloudinary Upload Error:", uploadErr);
-        throw new Error("Failed to upload profile picture");
-      }
-    };
 
-    if (!AutherId && mongoose.Types.ObjectId.isValid(staffId)) {
+    if (
+      !mongoose.Types.ObjectId.isValid(AutherId) ||
+      !mongoose.Types.ObjectId.isValid(staffId)
+    ) {
       return res.status(400).json({
         success: false,
         error: true,
-        message: "Invalid staffId",
-      });
-    }
-    if (!AutherId && !mongoose.Types.ObjectId.isValid(staffId)) {
-      return res.status(400).json({
-        success: false,
-        error: true,
-        message: "Invalid staffId",
+        message: "Invalid AutherId or staffId",
       });
     }
 
+    const UpdatedStaffData = await Worker.findById(staffId).select("-password");
+    if (!UpdatedStaffData) {
+      return res.status(404).json({
+        success: false,
+        error: true,
+        message: "Staff not found",
+      });
+    }
     const AutherData = await Worker.findById(AutherId);
     if (!AutherData) {
       return res.status(404).json({
@@ -218,30 +209,62 @@ export const UpdateStaffData = async (req, res) => {
         message: "Author not found",
       });
     }
-    AutherData.fullName = fullName || AutherData.fullName;
-    AutherData.email = email || AutherData.email;
-    AutherData.phoneNumber = phoneNumber || AutherData.phoneNumber;
-    AutherData.address = address || AutherData.address;
-    if (req.file) {
-      AutherData.profilePic = await uploadProfilePic(req.file);
+
+    if (
+      AutherData.role !== "Admin" &&
+      AutherData.role !== "Manager" &&
+      UpdatedStaffData._id.toString() !== AutherData._id.toString()
+    ) {
+      return res.status(403).json({
+        success: false,
+        error: true,
+        message: "You are not authorized to update this staff data",
+      });
     }
-    await AutherData.save();
 
-    const finastaffdata = AutherData.toObject();
-    delete finastaffdata.password;
+    UpdatedStaffData.fullName = fullName || UpdatedStaffData.fullName;
+    UpdatedStaffData.email = email || UpdatedStaffData.email;
+    UpdatedStaffData.phoneNumber = phoneNumber || UpdatedStaffData.phoneNumber;
+    UpdatedStaffData.address = address || UpdatedStaffData.address;
 
-    const populateData = await Worker.findById(AutherId).populate("BranchId");
+    if (req.file) {
+      const uploadProfilePic = async (file) => {
+        try {
+          const fileBase64 = `data:${
+            file.mimetype
+          };base64,${file.buffer.toString("base64")}`;
+          const cloudResponse = await cloudinary.uploader.upload(fileBase64, {
+            folder: "profilePic",
+          });
+          return cloudResponse.secure_url;
+        } catch (uploadErr) {
+          console.error("Cloudinary Upload Error:", uploadErr);
+          throw new Error("Failed to upload profile picture");
+        }
+      };
+      UpdatedStaffData.profilePic = await uploadProfilePic(req.file);
+    }
+
+    await UpdatedStaffData.save();
+
+    const finastaffdata = UpdatedStaffData.toObject();
+    delete finastaffdata.pa;
+    const populateData = await Worker.findById(finastaffdata._id).populate(
+      "BranchId",
+      "branchName address branchImage branchPhoneNumber"
+    );
+
     return res.status(200).json({
       success: true,
       message: "Staff data updated successfully",
       staff: populateData,
     });
   } catch (error) {
-    console.log(`Error in UpdateStaffData: ${error}`);
+    console.error(`Error in UpdateStaffData: ${error}`);
     return res.status(500).json({
       success: false,
       error: true,
-      message: `An unexpected error occurred while updating staff dataa : ${error.message}`,
+      message: `An unexpected error occurred while updating staff data: ${error.message}`,
     });
   }
 };

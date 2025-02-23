@@ -11,7 +11,6 @@ export const markAbsentAttendance = async () => {
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
 
-    // Find workers who do not have attendance for today
     const workersWithoutAttendance = await Worker.find({
       _id: {
         $nin: await Attendance.distinct("staffId", {
@@ -25,7 +24,6 @@ export const markAbsentAttendance = async () => {
       return;
     }
 
-    // Create bulk attendance records
     const absentRecords = workersWithoutAttendance.map((worker) => ({
       staffId: worker._id,
       BranchId: worker.BranchId,
@@ -42,7 +40,6 @@ export const markAbsentAttendance = async () => {
     console.error("❌ Error in marking absent attendance:", err);
   }
 };
- 
 
 cron.schedule("0 0 * * *", markAbsentAttendance);
 
@@ -64,7 +61,6 @@ export const createNewAttendance = async (req, res) => {
           "Worker ID and valid status (Present, Absent, Leave) are required",
       });
     }
-
     if (
       !mongoose.Types.ObjectId.isValid(Workerid) ||
       !mongoose.Types.ObjectId.isValid(AutherId)
@@ -73,14 +69,11 @@ export const createNewAttendance = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Invalid ID format" });
     }
-
-    // Find Author (Manager/Admin)
     const Auther = await Worker.findById(AutherId);
     if (!Auther || (Auther.role !== "Manager" && Auther.role !== "Admin")) {
       return res.status(403).json({ success: false, message: "Unauthorized" });
     }
 
-    // Find Worker
     const WorkerData = await Worker.findById(Workerid);
     if (!WorkerData || WorkerData.BranchId.toString() !== BranchId) {
       return res
@@ -91,7 +84,6 @@ export const createNewAttendance = async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Update attendance or insert new record
     const updatedAttendance = await Attendance.findOneAndUpdate(
       { staffId: Workerid, date: today },
       { staffId: Workerid, BranchId, status, notes, hoursWorked, date: today },
@@ -114,8 +106,6 @@ export const ViewAllAttendanceAtOneDayWIthOneBranch = async (req, res) => {
     const branchId = req.params.branchId;
     const AutherId = req.staffId;
     let { date } = req.query;
-
-    // Validate branchId and AutherId
     if (
       !mongoose.Types.ObjectId.isValid(branchId) ||
       !mongoose.Types.ObjectId.isValid(AutherId)
@@ -126,8 +116,6 @@ export const ViewAllAttendanceAtOneDayWIthOneBranch = async (req, res) => {
         message: "Invalid branchId or AutherId",
       });
     }
-
-    // Validate Date Input
     if (!date) {
       return res.status(400).json({
         success: false,
@@ -144,14 +132,11 @@ export const ViewAllAttendanceAtOneDayWIthOneBranch = async (req, res) => {
         message: "Invalid date format. Use YYYY-MM-DD.",
       });
     }
-
-    // Convert date to start and end of the day (00:00:00 to 23:59:59)
     const startOfDay = new Date(parsedDate);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(parsedDate);
     endOfDay.setHours(23, 59, 59, 999);
 
-    // Fetch the Author (Manager/Admin)
     const Auther = await Worker.findById(AutherId);
     if (!Auther || (Auther.role !== "Manager" && Auther.role !== "Admin")) {
       return res.status(403).json({
@@ -220,6 +205,9 @@ export const ViewMonthlyAttendanceOfOneStaff = async (req, res) => {
     const Staffid = req.params.Staffid;
     let { month, year } = req.query;
 
+    console.log(Staffid);
+    console.log(AutherId);
+
     if (
       !mongoose.Types.ObjectId.isValid(AutherId) ||
       !mongoose.Types.ObjectId.isValid(Staffid)
@@ -283,6 +271,7 @@ export const ViewMonthlyAttendanceOfOneStaff = async (req, res) => {
 
     // Additional Check: If Manager, ensure the Staff is in the same branch
     if (
+      Auther.role === "Admin" &&
       Auther.role === "Manager" &&
       Auther.BranchId.toString() !== Staff.BranchId.toString()
     ) {

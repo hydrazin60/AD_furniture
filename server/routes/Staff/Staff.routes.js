@@ -12,7 +12,7 @@ const StaffRouter = express.Router();
 StaffRouter.get("/view/staff/:staffIds", isAuthenticated, GetOneStaffData);
 StaffRouter.get("/view/all/staff", isAuthenticated, GetAllStaffData);
 StaffRouter.put(
-  "/update/staff",
+  "/update/staff/:staffId",
   isAuthenticated,
   uploadSingleImage("profilePic"),
   UpdateStaffData

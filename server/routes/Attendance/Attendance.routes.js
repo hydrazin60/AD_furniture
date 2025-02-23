@@ -19,7 +19,7 @@ AttendanceRouter.get(
 );
 
 AttendanceRouter.get(
-  "/get/monthly_attendance/:staffId",
+  "/get/monthly_attendance/:Staffid",
   isAuthenticated,
   ViewMonthlyAttendanceOfOneStaff
 );

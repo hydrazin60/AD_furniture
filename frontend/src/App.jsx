@@ -6,6 +6,7 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Contract from './pages/Contract';
 import Services from './pages/Services';
+import Admin from './pages/Admin';
 import Login from './features/auth/Login';
 
 function App() {
@@ -67,6 +68,11 @@ function App() {
                 </Link>
               </li>
               <li>
+                <Link to="/admin" className="text-white hover:bg-black hover:text-white p-2 rounded">
+                  Admin Dashboard
+                </Link>
+              </li>
+              <li>
                 <Link to="/login" className="text-white hover:bg-black hover:text-white p-2 rounded">
                   Login
                 </Link>
@@ -98,6 +104,11 @@ function App() {
                   </Link>
                 </li>
                 <li>
+                <Link to="/admin" className="text-white hover:bg-black hover:text-white p-2 rounded">
+                  Admin Dashboard
+                </Link>
+              </li>
+                <li>
                   <Link to="/login" className="text-white hover:bg-black hover:text-white p-2 rounded" onClick={toggleMobileMenu}>
                     Login
                   </Link>
@@ -113,6 +124,7 @@ function App() {
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
             <Route path="/contract" element={<Contract />} />
+            <Route path="/admin" element={<Admin />} />
             <Route path="/login" element={<Login />} />
           </Routes>
         </div>

@@ -75,27 +75,7 @@ const Login = () => {
             </div>
           </div>
 
-          <div className="mt-4 text-center">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-500">Or</span>
-              </div>
-            </div>
-            <button
-              onClick={handleGoogleLogin}
-              className="mt-4 w-full border border-gray-300 rounded-md py-2 px-4 flex items-center justify-center space-x-2"
-            >
-              <img
-                src="https://www.svgrepo.com/show/475656/google-color.svg" // Replace with your Google logo URL
-                alt="Google Logo"
-                className="h-5 w-5"
-              />
-              <span className="text-sm font-medium text-gray-700">Continue with Google</span>
-            </button>
-          </div>
+          
 
           <div className="mt-6 text-center text-gray-600 text-sm">
             New to Amazon?{' '}

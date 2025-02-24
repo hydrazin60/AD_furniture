@@ -50,7 +50,7 @@ const testimonials = [
 
 const About = () => {
   return (
-    <section className="text-white bg-gradient-to-br from-gray-900 to-black py-24 px-4 md:px-16">
+    <section className="text-white bg-gradient-to-br from-gray-950 to-black py-24 px-4 md:px-16">
       <div className="max-w-7xl mx-auto">
         {/* Hero Section */}
         <div className="text-center mb-20">

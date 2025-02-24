@@ -1,135 +1,169 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-
-// navbar
-import Home from './pages/Home';
-import About from './pages/About';
-import Contract from './pages/Contract';
-import Services from './pages/Services';
-import Admin from './pages/Admin';
-import Login from './features/auth/Login';
+import React from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import About from "./pages/About";
+import Contract from "./pages/Contract";
+import Services from "./pages/Services";
+import Login from "./pages/Login";
+import NavBar from "./pages/NavBar";
+import AdminRegister from "./pages/Admin/AUth/AdminRegister";
+import NewStaffRegister from "./pages/Manager/Auth/NewStaffRegister";
+import StaffManagment from "./pages/Manager/staff/StaffManagment";
+import FinalProductManagement from "./pages/Manager/Final_product/FinalProductManagement";
+import RawMaterialManagment from "./pages/Manager/Raw_Material/RawMaterialManagment";
+import ExpenseInvoicesManagement from "./pages/Manager/Invoice/ExpenseInvoices/ExpenseInvoicesManagement";
+import PurchaseInvoicesManagment from "./pages/Manager/Invoice/PurchaseInvoices/PurchaseInvoicesManagment";
+import SalesReceiptManagment from "./pages/Manager/Invoice/SalesReceipt/SalesReceiptManagment";
+import StaffDashboard from "./pages/StaffDashboard";
+import CustomerManagementPage from "./pages/Manager/Customer/CustomerManagementPage";
+import BranchManagement from "./pages/Manager/Branch/BranchManagement";
+import SalaryManagment from "./pages/Manager/salary/SalaryManagment";
+import VehiclesManagment from "./pages/Manager/Vehicles/VehiclesManagment";
+import TodoListManagment from "./pages/Manager/Todo_list_project/TodoListManagment";
+import SupplierManagment from "./pages/Manager/Supplier/SupplierManagment";
+import NewBranchRegister from "./pages/Admin/Branch/NewBranchRegister";
+import RegisterNewCustommer from "./pages/Manager/Customer/RegisterNewCustomer";
+import UploadFinalProduct from "./pages/Manager/Final_product/UploadFinalProduct";
+import CreateExpenseInvoices from "./pages/Manager/Invoice/ExpenseInvoices/CreateExpenseInvoices";
+import CreatePurchaseInvoices from "./pages/Manager/Invoice/PurchaseInvoices/CreatePurchaseInvoices";
+import CreateSalesReceipt from "./pages/Manager/Invoice/SalesReceipt/CreateSalesReceipt";
+import UpdateRawMaterial from "./pages/Manager/Raw_Material/UpdateRawMaterial";
+import CreateSalary from "./pages/Manager/salary/CreateSalary";
+import RegisterNewSuppliers from "./pages/Manager/Supplier/RegisterNewSuppliers";
+import NewVehiclesRegister from "./pages/Manager/Vehicles/NewVehiclesRegister";
+import Staffcontrollers from "./pages/Controllers/Staffcontrollers";
+import BranchControllers from "./pages/Controllers/BranchControllers";
+import InvoiceControllers from "./pages/Controllers/InvoiceControllers";
+import ProductControllers from "./pages/Controllers/ProductControllers";
+import SalaryControllers from "./pages/Controllers/SalaryControllers";
+import SupplierAndCustomerControllers from "./pages/Controllers/SupplierAndCustomerControllers";
+import TodoListControllers from "./pages/Controllers/TodoListControllers";
+import VehiclesControl from "./pages/Controllers/VehiclesControl";
+import RawMaterialControl from "./pages/Controllers/RawMaterialControl";
 
 function App() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
   return (
-    <Router>
+    <BrowserRouter
+      future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
+    >
       <div className="bg-gray-100 min-h-screen">
-        {/* Navigation Bar */}
-        <nav className="bg-teal-500 p-4 fixed top-0 left-0 right-0 z-50"> {/* Added fixed, top-0, left-0, right-0, and z-50 */}
-          <div className="container mx-auto flex justify-between items-center">
-            <div className="text-white font-bold text-xl">AD FURNITURE</div>
-
-            {/* Mobile Menu Button */}
-            <div className="md:hidden">
-              <button onClick={toggleMobileMenu} className="text-white">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"}
-                  />
-                </svg>
-              </button>
-            </div>
-
-            {/* Desktop Menu */}
-            <ul className="hidden md:flex space-x-4">
-              <li>
-                <Link to="/" className="text-white hover:bg-black hover:text-white p-2 rounded">
-                  Home
-                </Link>
-              </li>
-              <li>
-                <Link to="/about" className="text-white hover:bg-black hover:text-white p-2 rounded">
-                  About
-                </Link>
-              </li>
-             
-              <li>
-                <Link to="/services" className="text-white hover:bg-black hover:text-white p-2 rounded">
-                  Services
-                </Link>
-              </li>
-              <li>
-                <Link to="/contract" className="text-white hover:bg-black hover:text-white p-2 rounded">
-                  Contract
-                </Link>
-              </li>
-              <li>
-                <Link to="/admin" className="text-white hover:bg-black hover:text-white p-2 rounded">
-                  Admin Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link to="/login" className="text-white hover:bg-black hover:text-white p-2 rounded">
-                  Login
-                </Link>
-              </li>
-            </ul>
-
-            {/* Mobile Menu */}
-            <div className={`md:hidden absolute top-16 left-0 w-full bg-teal-500 z-10 ${isMobileMenuOpen ? 'block' : 'hidden'}`}>
-              <ul className="flex flex-col space-y-2 p-4">
-                <li>
-                  <Link to="/" className="text-white hover:bg-black hover:text-white p-2 rounded" onClick={toggleMobileMenu}>
-                    Home
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/about" className="text-white hover:bg-black hover:text-white p-2 rounded" onClick={toggleMobileMenu}>
-                    About
-                  </Link>
-                </li>
-                
-                <li>
-                  <Link to="/services" className="text-white hover:bg-black hover:text-white p-2 rounded" onClick={toggleMobileMenu}>
-                    Services
-                  </Link>
-                </li>
-                <li>
-                  <Link to="/contract" className="text-white hover:bg-black hover:text-white p-2 rounded" onClick={toggleMobileMenu}>
-                    Contract
-                  </Link>
-                </li>
-                <li>
-                <Link to="/admin" className="text-white hover:bg-black hover:text-white p-2 rounded">
-                  Admin Dashboard
-                </Link>
-              </li>
-                <li>
-                  <Link to="/login" className="text-white hover:bg-black hover:text-white p-2 rounded" onClick={toggleMobileMenu}>
-                    Login
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </nav>
-
-        <div className="container mx-auto p-4 pt-16"> {/* Added pt-16 to account for fixed navbar height */}
+        <NavBar />
+        <div className=" pt-16">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/services" element={<Services />} />
             <Route path="/contract" element={<Contract />} />
-            <Route path="/admin" element={<Admin />} />
             <Route path="/login" element={<Login />} />
+            <Route
+              path="/staff/dashboard/:staffIds"
+              element={<StaffDashboard />}
+            />
+            {/* ontroller Routes */}
+            <Route path="/staff/controllers" element={<Staffcontrollers />} />
+            <Route path="/branch/controllers" element={<BranchControllers />} />
+            <Route
+              path="/invoice/controllers"
+              element={<InvoiceControllers />}
+            />
+            <Route
+              path="/product/controllers"
+              element={<ProductControllers />}
+            />
+            <Route path="/salary/controllers" element={<SalaryControllers />} />
+            <Route
+              path="/supplier/customers/controllers"
+              element={<SupplierAndCustomerControllers />}
+            />
+            <Route
+              path="/todolist/controllers"
+              element={<TodoListControllers />}
+            />
+            <Route path="/vehicles/controllers" element={<VehiclesControl />} />
+            <Route
+              path="/raw_material/controllers"
+              element={<RawMaterialControl />}
+            />
+            {/*  Admin register */}
+            <Route path="/admin/register" element={<AdminRegister />} />
+            {/* staff */}
+            <Route path="/staff/register" element={<NewStaffRegister />} />
+            <Route path="/branch/register" element={<NewBranchRegister />} />
+            {/* Customer Routes */}
+            <Route
+              path="/customer/register"
+              element={<RegisterNewCustommer />}
+            />
+            {/* Final Product Routes */}
+            <Route
+              path="/upload/final_product"
+              element={<UploadFinalProduct />}
+            />
+            {/* invoices Routes */}
+            <Route
+              path="/create/expenseinvoice"
+              element={<CreateExpenseInvoices />}
+            />
+            <Route
+              path="/create/purchaseinvoice"
+              element={<CreatePurchaseInvoices />}
+            />
+            <Route
+              path="/create/salesreceipt"
+              element={<CreateSalesReceipt />}
+            />
+            {/* Raw Material Routes */}
+            <Route path="/upload/rawmaterial" element={<UpdateRawMaterial />} />
+            {/* Salary Routes */}
+            <Route path="/create/salary" element={<CreateSalary />} />
+            {/* Supplier Routes */}
+            <Route
+              path="/supplier/register"
+              element={<RegisterNewSuppliers />}
+            />
+            <Route path="/vehicle/register" element={<NewVehiclesRegister />} />
+
+            {/* Managment Routes */}
+            <Route path="/staffmanagment" element={<StaffManagment />} />
+            <Route
+              path="/final_Product/management"
+              element={<FinalProductManagement />}
+            />
+            <Route
+              path="/raw_material/management"
+              element={<RawMaterialManagment />}
+            />
+            <Route
+              path="/expenseInvoices/management"
+              element={<ExpenseInvoicesManagement />}
+            />
+            <Route
+              path="/purchaseInvoices/management"
+              element={<PurchaseInvoicesManagment />}
+            />
+            <Route
+              path="/salesInvoices/management"
+              element={<SalesReceiptManagment />}
+            />
+            <Route
+              path="/customer/management"
+              element={<CustomerManagementPage />}
+            />
+            <Route path="/branch/management" element={<BranchManagement />} />
+            <Route path="/salary/management" element={<SalaryManagment />} />
+            <Route path="/vehicle/management" element={<VehiclesManagment />} />
+            <Route
+              path="/todo_list/management"
+              element={<TodoListManagment />}
+            />
+            <Route
+              path="/supplier/management"
+              element={<SupplierManagment />}
+            />
           </Routes>
         </div>
       </div>
-    </Router>
+    </BrowserRouter>
   );
 }
 

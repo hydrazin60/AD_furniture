@@ -87,7 +87,7 @@ const CustomerSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    status: {
+    status: {    //
       type: String,
       enum: ["Active", "Inactive"],
       default: "Active",
@@ -96,7 +96,7 @@ const CustomerSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    customerCreateBy :{
+    customerCreateBy :{ //
       type: mongoose.Schema.Types.ObjectId,
       ref: "Worker",
     },

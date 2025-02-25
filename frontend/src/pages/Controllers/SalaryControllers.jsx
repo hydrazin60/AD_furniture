@@ -1,7 +1,9 @@
 import React from "react";
 import ManagerAdmin from "../../components/ManagerandAdmin/ManagerandAdmin";
+import { useNavigate } from "react-router-dom";
 
 export default function SalaryControllers() {
+    const navigate = useNavigate();
   const adminOptions = [
     {
       title: "Pay Salary",
@@ -28,7 +30,7 @@ export default function SalaryControllers() {
   };
 
   return (
-    <div className="flex flex-col gap-20 ">
+    <div className="flex flex-col gap-20  lg:p-10 sm:p-5 p-1  ">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6   lg:p-10 sm:p-5 ">
         {adminOptions.map((option, index) => (
           <div

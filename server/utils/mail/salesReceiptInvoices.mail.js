@@ -40,6 +40,9 @@ export const sendSalesReceiptInvoiceMail = async (
       `
       )
       .join("");
+    console.log(branchAddress, "add>>");
+    let adresses = branchAddress.map((items) => items);
+    console.log(adresses, "add");
 
     // Email content setup
     const mailOptions = {
@@ -53,7 +56,11 @@ export const sendSalesReceiptInvoiceMail = async (
           <h3 style="color: #4CAF50;">Branch Details</h3>
           <p><strong>Branch Name:</strong> ${branchName}</p>
           <p><strong>Branch Phone:</strong> ${branchPhoneNumber}</p>
-          <p><strong>Branch Address:</strong> ${branchAddress}</p>
+          <p><strong>Branch Address:</strong>  ${
+            branchAddress[0].province
+          } province , ${branchAddress[0].district} district , ${
+        branchAddress[0].municipality
+      } municipality </p>
           <h3 style="color: #4CAF50;">Invoice Details</h3>
           <p><strong>Sales Receipt Number:</strong> ${salesReceiptNumber}</p>
           <p><strong>Payment Date:</strong> ${new Date(

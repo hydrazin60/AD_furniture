@@ -314,7 +314,6 @@ export const ViewMonthlyAttendanceOfOneStaff = async (req, res) => {
         message: "No attendance data found for this staff member",
       });
     }
-
     // Response with Data
     return res.status(200).json({
       success: true,

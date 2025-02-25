@@ -38,7 +38,7 @@ const BranchSchema = new mongoose.Schema(
           type: String,
           default: "",
         },
-        street: {
+        municipality: {
           type: String,
           default: "",
         },

@@ -45,10 +45,12 @@ export const StaffRegister = async (req, res) => {
       phoneNumber,
       password,
       address,
+      TemparoryAddress,
       role,
       branchName,
     } = req.body;
 
+    console.log("req.body", req.body);
     if (!mongoose.Types.ObjectId.isValid(AutherId) || !AutherId) {
       return res.status(400).json({
         success: false,
@@ -113,6 +115,7 @@ export const StaffRegister = async (req, res) => {
       phoneNumber,
       password,
       address,
+      TemparoryAddress,
       profilePic: profilePicURI,
       role,
       BranchId: branch._id,

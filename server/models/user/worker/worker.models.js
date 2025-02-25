@@ -41,6 +41,26 @@ const WorkerSchema = new mongoose.Schema(
         },
       },
     ],
+    TemparoryAddress: [
+      {
+        country: {
+          type: String,
+          default: "Nepal",
+        },
+        province: {
+          type: String,
+          default: "",
+        },
+        district: {
+          type: String,
+          default: "",
+        },
+        municipality: {
+          type: String,
+          default: "",
+        },
+      },
+    ],
     password: {
       type: String,
       required: [true, "Password is required"],

@@ -46,7 +46,7 @@ function App() {
     <BrowserRouter
       future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
     >
-      <div className="bg-gray-100 min-h-screen">
+      <div className=" min-h-screen">
         <NavBar />
         <div className=" pt-16">
           <Routes>
